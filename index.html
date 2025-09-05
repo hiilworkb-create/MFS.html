@@ -27,8 +27,8 @@
     .error{color:var(--error-color);font-size:14px;margin-top:6px;font-weight:600;text-align:left}
     .success{color:#28a745;font-size:16px;margin-top:10px;font-weight:600;text-align:center;display:none}
     .buttons{margin-top:20px;display:flex;flex-direction:column;gap:12px}
-    button,a.button{width:100%;padding:14px;border:none;border-radius:10px;cursor:pointer;font-size:16px;font-weight:600;transition:background-color .3s,transform .1s;text-decoration:none;display:inline-block;text-align:center;color:var(--white)}
-    button:hover,a.button:hover{transform:translateY(-2px)}
+    button{width:100%;padding:14px;border:none;border-radius:10px;cursor:pointer;font-size:16px;font-weight:600;transition:background-color .3s,transform .1s;text-align:center;color:var(--white)}
+    button:hover{transform:translateY(-2px)}
     button:disabled{background:#ccc;cursor:not-allowed}
     .next{background:var(--primary-color)}
     .back{background:var(--secondary-color)}
@@ -45,7 +45,7 @@
       .container{padding:20px}
       h2,h3{font-size:1.4em}
       input{font-size:14px;padding:10px 12px}
-      button,a.button{font-size:14px;padding:12px}
+      button{font-size:14px;padding:12px}
       .data-table th,.data-table td{padding:10px;font-size:12px}
     }
   </style>
@@ -59,7 +59,7 @@
         <h2 id="welcome-message">📋 Добро пожаловать, 👋</h2>
         <p>Мы — ваш официальный помощник для оформления регистрации по месту жительства. Готовы начать оформление?</p>
         <div class="buttons">
-          <a href="https://t.me/MFC_Bot?start=welcome" target="_blank" class="button">Открыть приложение Telegram</a>
+          <!-- УДАЛЕНО: ссылка "Открыть приложение Telegram" -->
           <button class="menu-btn" data-action="schedule">📋 Записаться на приём</button>
           <button class="menu-btn" data-action="documents">📜 Список документов</button>
           <button class="menu-btn" data-action="check-status">🔍 Проверить статус заявки</button>
@@ -209,7 +209,7 @@
       <div class="step" id="step-contact">
         <h3>📞 Связаться с поддержкой</h3>
         <p>Свяжитесь с поддержкой:</p>
-        <a href="https://t.me/MFC_SUPPOR" target="_blank" class="button next">📞 Написать в поддержку МФЦ</a>
+        <a href="https://t.me/MFC_SUPPOR" target="_blank" class="button next" style="display:inline-block;background:#990000;text-decoration:none;border-radius:10px;padding:12px 16px;color:#fff;">📞 Написать в поддержку МФЦ</a>
         <div class="buttons">
           <button class="back">↩️ Вернуться назад</button>
         </div>
@@ -273,17 +273,19 @@
       initEventListeners(){
         const root=document.getElementById('wizard');
         if(!root) return;
+
         root.addEventListener('click',(e)=>{
           const t=e.target;
           if(t.classList.contains('next') && !t.closest('a') && !t.closest('.redirect-button')) this.handleNext();
           else if(t.classList.contains('back')) this.handleBack();
-          else if(t.classList.contains('menu-btn')) this.handleMenuAction(t.dataset.action,t.dataset.doc);
+          else if(t.classList.contains('menu-btn')) this.handleMenuAction(t.dataset.action, t.dataset.doc);
           else if(t.classList.contains('service-btn')) this.handleServiceAction(t.dataset.service);
           else if(t.classList.contains('faq-btn')) this.handleFaqAction(t.dataset.faq);
         });
-        ['fullname','phone','address','docnumber','code','status-number','status-passport'].forEach(id=>{
-          const input=document.getElementById(id);
-          input && input.addEventListener('input',()=>this.validateStep(this.currentStep));
+
+        ['fullname', 'phone', 'address', 'docnumber', 'code', 'status-number', 'status-passport'].forEach(id => {
+          const input = document.getElementById(id);
+          input?.addEventListener('input', () => this.validateStep(this.currentStep));
         });
       }
 
@@ -309,13 +311,14 @@
       }
 
       showStep(stepId){
-        this.steps.forEach(step=>step.classList.toggle('active', step.id===`step-${stepId}`));
+        this.steps.forEach(step=>{ step.classList.toggle('active', step.id===`step-${stepId}`); });
         this.currentStep=stepId;
         window.scrollTo({top:0,behavior:'smooth'});
       }
 
       handleNext(){
         if(!this.validateStep(this.currentStep)) return;
+
         const nextSteps={
           fullname:'phone',
           phone:'address',
@@ -326,9 +329,10 @@
           'status-number':'main',
           'status-passport':'main'
         };
+
         if(nextSteps[this.currentStep]){
-          const curInput=document.getElementById(this.currentStep);
-          if(curInput && 'value' in curInput) this.formData[this.currentStep]=curInput.value.trim();
+          const currentEl=document.getElementById(this.currentStep);
+          if(currentEl && 'value' in currentEl) this.formData[this.currentStep]=currentEl.value.trim();
           if(this.currentStep==='code') this.saveData();
           this.showStep(nextSteps[this.currentStep]);
         }
@@ -357,7 +361,7 @@
         this.showStep(backSteps[this.currentStep]||'main');
       }
 
-      handleMenuAction(action,doc){
+      handleMenuAction(action, doc){
         if(action==='schedule') this.showStep('fullname');
         else if(action==='documents') this.showStep('documents');
         else if(action==='check-status') this.showStep('check-status');
@@ -394,9 +398,10 @@
           "9":{title:"❓ 9. Как долго обрабатывается заявка?",answer:"🕒 Заявка обрабатывается в течение 3-5 рабочих дней."},
           "10":{title:"❓ 10. Что делать, если потерял выписку ЕГРН?",answer:"📄 Если потеряли выписку ЕГРН, запросите новую в МФЦ."}
         };
+
         const title=document.getElementById('faq-title');
         const ans=document.getElementById('faq-answer');
-        if(title && ans && content[faq]){
+        if(content[faq]){
           title.textContent=content[faq].title;
           ans.textContent=content[faq].answer;
           this.showStep('faq-answer');
