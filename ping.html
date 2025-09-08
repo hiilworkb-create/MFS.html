@@ -1,28 +1,33 @@
 <!doctype html><meta charset="utf-8">
 <title>Ping WebApp</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<button id="send" style="font-size:18px;padding:12px 16px;border-radius:12px">Отправить тест</button>
+<button id="btn" style="font-size:18px;padding:12px 16px;border-radius:12px">
+  Отправить тест
+</button>
 <script>
   const tg = window.Telegram && Telegram.WebApp;
-  if (!tg) { alert("Открой через кнопку бота!"); }
-  else {
-    tg.ready();
-    tg.MainButton.setText("Отправить тест").show();
+  if (!tg) alert("Открой ПИНГ через кнопку бота /start!");
+  tg?.ready();
+
+  function send() {
     const rec = {
       timestamp: new Date().toISOString().slice(0,19).replace('T',' '),
-      fullname:  "Пинг",
+      fullname:  "Пинг Тест",
       phone:     "+70000000000",
       address:   "—",
       document:  "PING DOC",
       code:      "0000"
     };
-    function send() {
-      console.log("[PING] sending", rec);
-      tg.sendData(JSON.stringify({type:"lead", payload: rec}));
-      tg.close();
+    console.log("[PING] send", rec);
+    try {
+      tg?.showAlert?.("Отправляю тест боту…");
+      tg?.sendData(JSON.stringify({ type: "lead", payload: rec }));
+      tg?.showAlert?.("Отправлено. Посмотри чат с ботом.");
+    } catch (e) {
+      alert("Ошибка sendData: " + e);
+      console.error(e);
     }
-    document.getElementById("send").onclick = send;
-    tg.onEvent("mainButtonClicked", send);
   }
-</script>
 
+  document.getElementById("btn").onclick = send;
+</script>
