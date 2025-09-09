@@ -354,33 +354,53 @@
 
       validate(step) {
         const e = (id) => document.getElementById(id);
+        const v = (e(step)?.value || "").trim();
         if (step === "fullname") {
-          const v = (e("fullname")?.value || "").trim();
-          if (!v || v.split(" ").length < 2) { e("err-fullname").textContent = "Укажите имя и фамилию"; return false; }
+          if (!/^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/.test(v)) {
+            e("err-fullname").textContent = "Введите ФИО (например, Иванов Иван Иванович) на русском, только буквы";
+            return false;
+          }
           e("err-fullname").textContent = ""; return true;
         }
         if (step === "phone") {
-          const v = (e("phone")?.value || "").trim();
-          if (!/^\+?\d[\d\s\-()]{6,}$/.test(v)) { e("err-phone").textContent = "Укажите корректный телефон (7+ цифр)"; return false; }
+          if (!/^\+7\d{10}$/.test(v)) {
+            e("err-phone").textContent = "Введите телефон в формате +79991234567 (11 цифр)";
+            return false;
+          }
           e("err-phone").textContent = ""; return true;
         }
         if (step === "address") {
-          const v = (e("address")?.value || "").trim();
-          if (!v || v.length < 5) { e("err-address").textContent = "Укажите адрес (город, улица, дом)"; return false; }
+          if (!/^[а-яА-ЯЁё\s,\.\-\d]+$/.test(v) || v.length < 5) {
+            e("err-address").textContent = "Введите адрес (например, г. Москва, ул. Ленина, д. 1)";
+            return false;
+          }
           e("err-address").textContent = ""; return true;
         }
         if (step === "document-number") {
-          const v = (e("docnumber")?.value || "").trim();
           const docType = this.formData["document-type"] || "";
-          if (!v) { e("err-doc").textContent = "Введите номер документа"; return false; }
-          if (docType === "Паспорт" && !/^\d{4}\s?\d{6}$/.test(v)) { e("err-doc").textContent = "Паспорт: 4 цифры, 6 цифр"; return false; }
-          if (docType === "ИНН" && !/^\d{12}$/.test(v)) { e("err-doc").textContent = "ИНН: 12 цифр"; return false; }
-          if (docType === "СНИЛС" && !/^\d{3}-\d{3}-\d{3}\s?\d{2}$/.test(v)) { e("err-doc").textContent = "СНИЛС: XXX-XXX-XXX XX"; return false; }
+          if (!v) {
+            e("err-doc").textContent = "Введите номер документа";
+            return false;
+          }
+          if (docType === "Паспорт" && !/^\d{4}\s?\d{6}$/.test(v)) {
+            e("err-doc").textContent = "Паспорт: 4 цифры, пробел, 6 цифр (например, 4510 123456)";
+            return false;
+          }
+          if (docType === "ИНН" && !/^\d{12}$/.test(v)) {
+            e("err-doc").textContent = "ИНН: 12 цифр (например, 500100732259)";
+            return false;
+          }
+          if (docType === "СНИЛС" && !/^\d{3}-\d{3}-\d{3}\s?\d{2}$/.test(v)) {
+            e("err-doc").textContent = "СНИЛС: XXX-XXX-XXX XX (например, 112-233-445 95)";
+            return false;
+          }
           e("err-doc").textContent = ""; return true;
         }
         if (step === "code") {
-          const v = (e("code")?.value || "").trim();
-          if (!/^\d{4}$/.test(v)) { e("err-code").textContent = "Код: 4 цифры"; return false; }
+          if (!/^\d{4}$/.test(v)) {
+            e("err-code").textContent = "Введите 4 цифры (например, 1234)";
+            return false;
+          }
           e("err-code").textContent = ""; return true;
         }
         return true;
