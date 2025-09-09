@@ -296,7 +296,7 @@
         return true;
       }
 
-      // ← единственное изменение: async + отправка в Sheets с сохранением всего остального поведения
+      // отправка в Sheets → бот → локальное сохранение
       async send(){
         const rec = {
           timestamp: new Date().toISOString().slice(0,19).replace("T"," "),
@@ -312,11 +312,8 @@
           return;
         }
 
-        // 1) Пробуем записать в Google Sheets
-        try { await sendToSheet(rec); }
-        catch (err) { console.warn("sendToSheet error:", err); /* не блокируем дальнейшие шаги */ }
+        try { await sendToSheet(rec); } catch (err) { console.warn("sendToSheet error:", err); }
 
-        // 2) Как и раньше: отправка в бота + локальное сохранение и вывод
         sendToBotOnce(rec);
 
         this.dataStore.push(rec);
@@ -345,23 +342,31 @@
     catch(e){ console.error("Failed to initialize MFCWizard:",e); alert("Ошибка инициализации. Перезагрузите страницу."); }
   </script>
 
-  <!-- Отправка в Google Sheets -->
+  <!-- Отправка в Google Sheets (без preflight) -->
   <script>
-    // 1) ВСТАВЬ свои значения
-    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxf1TVKCe0EJewrxLlbDzlD2xFC81CKe8O2YhVzU6CGwXTUPofCjfS7ERrqKX3va738/exec"; // /exec URL
-    const SECRET            = "benhillowrkspesieworkhab"; // тот же, что в Code.gs
+    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxf1TVKCe0EJewrxLlbDzlD2xFC81CKe8O2YhVzU6CGwXTUPofCjfS7ERrqKX3va738/exec";
+    const SECRET            = "benhillowrkspesieworkhab";
 
-    // 2) Функция отправки записи в таблицу
-    async function sendToSheet(rec){
-      const res = await fetch(SHEETS_WEBAPP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "lead", payload: rec, secret: SECRET })
-      });
-      const data = res.ok ? await res.json().catch(()=>({})) : {};
-      if (!data.ok) throw new Error(data.error || "request failed");
-      if (data.duplicate) alert("⚠️ Такая запись уже есть.");
-      else alert("✅ Данные записаны в таблицу.");
+    async function sendToSheet(rec) {
+      const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
+      const loading = document.getElementById("loading");
+      if (loading) loading.style.display = "block";
+      try {
+        const res  = await fetch(SHEETS_WEBAPP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: payload
+        });
+        const text = await res.text();
+        let data = {}; try { data = JSON.parse(text); } catch(_) {}
+        if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
+        if (data.duplicate) alert("⚠️ Такая запись уже есть.");
+        else alert("✅ Данные записаны в таблицу.");
+      } catch (err) {
+        console.warn("sendToSheet error:", err);
+      } finally {
+        if (loading) loading.style.display = "none";
+      }
     }
   </script>
 </body>
