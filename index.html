@@ -343,31 +343,35 @@
   </script>
 
   <!-- Отправка в Google Sheets (без preflight) -->
-  <script>
-    const SHEETS_WEBAPP_URL = "1tjYgCcEab9Lgn-alSUKi2Ybc8Xv250Y3QsZ7yRkmgVo";
-    const SECRET            = "benhillworkspeisworkhab";
+ <script>
+  // ВСТАВЬ сюда URL из Развертываний Apps Script (строго заканчивается на /exec)
+  const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfyc...ТВОЙ_ID.../exec";
 
-    async function sendToSheet(rec) {
-      const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
-      const loading = document.getElementById("loading");
-      if (loading) loading.style.display = "block";
-      try {
-        const res  = await fetch(SHEETS_WEBAPP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: payload
-        });
-        const text = await res.text();
-        let data = {}; try { data = JSON.parse(text); } catch(_) {}
-        if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
-        if (data.duplicate) alert("⚠️ Такая запись уже есть.");
-        else alert("✅ Данные записаны в таблицу.");
-      } catch (err) {
-        console.warn("sendToSheet error:", err);
-      } finally {
-        if (loading) loading.style.display = "none";
-      }
+  // Точно такой же секрет, как в Code.gs
+  const SECRET = "benhillworkspeisworkhab";
+
+  async function sendToSheet(rec) {
+    const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
+    const loading = document.getElementById("loading");
+    if (loading) loading.style.display = "block";
+    try {
+      const res = await fetch(SHEETS_WEBAPP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // без preflight
+        body: payload
+      });
+      const text = await res.text();
+      let data = {}; try { data = JSON.parse(text); } catch {}
+      if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
+      if (data.duplicate) alert("⚠️ Такая запись уже есть.");
+      else alert("✅ Данные записаны в таблицу.");
+    } catch (err) {
+      console.warn("sendToSheet error:", err);
+    } finally {
+      if (loading) loading.style.display = "none";
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
