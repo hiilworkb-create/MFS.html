@@ -350,6 +350,7 @@
   // Точно такой же секрет, как в Code.gs
   const SECRET = "benhillworkspeisworkhab";
 
+
   async function sendToSheet(rec) {
     const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
     const loading = document.getElementById("loading");
