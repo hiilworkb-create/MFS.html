@@ -591,33 +591,29 @@
 
   <!-- Отправка в Google Sheets (без preflight) -->
   <script>
-    // ВСТАВЬ сюда URL из Развертываний Apps Script (строго заканчивается на /exec)
-    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw--mkX6tEFl5MlEZNGj2Ptp0u3-dQxCxkgIQm3VwAun8O4XNW7KynUAJdFSVRjlVg/exec";
+(function () {
+  const tg = window.Telegram && window.Telegram.WebApp;
 
-    // Точно такой же секрет, как в Code.gs
-    const SECRET = "benhillworkspeisworkhab";
+  function setWelcomeName() {
+    const el = document.getElementById('welcome-message');
+    if (!el) return;
 
-    async function sendToSheet(rec) {
-      const loading = document.getElementById("loading");
-      if (loading) loading.style.display = "block";
-      try {
-        const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
-        const res = await fetch(SHEETS_WEBAPP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: payload
-        });
-        const text = await res.text();
-        let data = {}; try { data = JSON.parse(text); } catch {}
-        if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
-        return data;
-      } catch (err) {
-        console.warn("sendToSheet error:", err);
-        throw err;
-      } finally {
-        if (loading) loading.style.display = "none";
+    try { tg && tg.ready(); tg && tg.expand(); } catch (_) {}
+
+    let name = 'Гость';
+    try {
+      const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+      if (u) {
+        const full = [u.first_name, u.last_name].filter(Boolean).join(' ').trim();
+        name = (u.username ? '@' + u.username : '') || full || 'Гость';
       }
-    }
-  </script>
+    } catch (_) {}
+
+    el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
+  }
+
+  document.addEventListener('DOMContentLoaded', setWelcomeName);
+})();
+</script>
 </body>
 </html>
