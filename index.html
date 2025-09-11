@@ -375,12 +375,13 @@
         const el = document.getElementById("welcome-message");
         const tg = window.Telegram?.WebApp;
         let name = "Гость";
-        try {
-          const u = tg?.initDataUnsafe?.user;
-          if (u) {
-            name = u.first_name || u.username || "Гость";
-          }
-        } catch (e) { console.warn("Error accessing Telegram user data:", e); }
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+          const user = tg.initDataUnsafe.user;
+          name = user.first_name || user.username || "Гость";
+          console.log("User data:", user); // Для отладки
+        } else {
+          console.warn("No Telegram user data available, using default 'Гость'");
+        }
         if (el) el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
       }
 
@@ -577,8 +578,15 @@
       }
     }
 
-    try { new MFCWizard(); }
-    catch (e) { console.error("Failed to initialize MFCWizard:", e); alert("Ошибка инициализации. Перезагрузите страницу."); }
+    // Выполняем инициализацию сразу после загрузки документа
+    document.addEventListener("DOMContentLoaded", () => {
+      try {
+        new MFCWizard();
+      } catch (e) {
+        console.error("Failed to initialize MFCWizard:", e);
+        alert("Ошибка инициализации. Перезагрузите страницу.");
+      }
+    });
   </script>
 
   <!-- Отправка в Google Sheets (без preflight) -->
