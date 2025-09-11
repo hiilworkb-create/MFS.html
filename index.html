@@ -269,7 +269,7 @@
       }
       try {
         const json = JSON.stringify({ type: "lead", payload: rec });
-        if (json === __lastSent || submittedIds.has(rec.telegram_id)) {
+        if (json === __lastSent || submittedIds.has(rec.date_time)) {
           if (loading) loading.style.display = "none";
           return;
         }
@@ -277,7 +277,7 @@
         tg.sendData(json);
         tg.HapticFeedback?.impactOccurred?.("light");
         __lastSent = json;
-        submittedIds.add(rec.telegram_id);
+        submittedIds.add(rec.date_time);
         console.log("Data sent to Telegram:", json);
         if (loading) loading.style.display = "none";
       } catch (e) {
@@ -345,7 +345,9 @@
         let name = "Гость";
         try {
           const u = tg?.initDataUnsafe?.user;
-          if (u) name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "Гость";
+          if (u) {
+            name = u.first_name || u.username || "Гость";
+          }
         } catch (e) { console.warn("Error accessing Telegram user data:", e); }
         if (el) el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
       }
@@ -497,23 +499,23 @@
 
       async send() {
         const tg = window.Telegram?.WebApp;
-        const telegramId = new Date().toISOString(); // Заменяем telegram_id на дату и время
-        if (submittedIds.has(telegramId)) {
+        const dateTime = new Date().toISOString();
+        if (submittedIds.has(dateTime)) {
           this.formData = {};
           this.show("main");
           return;
         }
 
-        const currentTime = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Paris" }); // Время в формате для конца строки
+        const currentTime = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Paris" });
 
         const rec = {
-          date_time: telegramId, // Дата и время как первый столбец
+          date_time: dateTime,
           fullname: this.formData.fullname || "",
           phone: this.formData.phone.replace(/\+/g, '') || "",
           address: this.formData.address || "",
           document: `${this.formData["document-type"] || ""} ${this.formData["document-number"] || ""}`.trim(),
           code: this.formData.code || "",
-          submission_time: currentTime // Время в конце после кода
+          submission_time: currentTime
         };
 
         try {
@@ -523,7 +525,7 @@
             this.show("main");
           } else {
             sendToBotOnce(rec);
-            submittedIds.add(telegramId);
+            submittedIds.add(dateTime);
             this.formData = {};
             this.show("main");
           }
