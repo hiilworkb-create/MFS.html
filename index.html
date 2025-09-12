@@ -422,23 +422,23 @@
           code: this.formData.code || ""
         };
 
-        console.log('Sending data to sheet at', new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Paris' }), ':', rec);
+        console.log('Sending data to sheet at', new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Paris' }), ':', JSON.stringify(rec, null, 2));
 
         try {
           const response = await sendToSheet(rec);
-          console.log('Server response:', response);
+          console.log('Server response:', JSON.stringify(response, null, 2));
           if (response.ok) {
             alert("Заявка успешно сохранена в таблице в " + new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Paris' }) + "!");
           } else {
             console.error('Server error:', response.error);
-            alert("Ошибка: " + (response.error || 'Неизвестная ошибка сервера'));
+            alert("Ошибка: " + (response.error || 'Неизвестная ошибка сервера. Проверьте консоль.'));
           }
           submittedIds.add(dateTime);
           this.formData = {};
           this.show("main");
         } catch (err) {
-          console.error('sendToSheet error:', err);
-          alert("Ошибка при отправке данных: " + (err.message || 'Проверьте подключение и повторите'));
+          console.error('sendToSheet error:', err.stack || err.message);
+          alert("Ошибка при отправке данных: " + (err.message || 'Проверьте подключение и консоль для деталей'));
         }
       }
     }
@@ -446,8 +446,8 @@
     async function sendToSheet(rec) {
       const url = 'YOUR_WEB_APP_URL';  // Замените на ваш реальный URL Apps Script
       if (!url || url === 'YOUR_WEB_APP_URL') {
-        console.error('Error: URL is not configured. Replace YOUR_WEB_APP_URL with your Apps Script URL.');
-        alert('Ошибка: URL не настроен. Замените YOUR_WEB_APP_URL на URL вашего скрипта.');
+        console.error('Error: URL is not configured. Please replace YOUR_WEB_APP_URL with your Google Apps Script deployment URL (e.g., https://script.google.com/macros/s/AKfycbw.../exec).');
+        alert('Ошибка: URL не настроен. Пожалуйста, замените YOUR_WEB_APP_URL на URL вашего развернутого Google Apps Script (например, https://script.google.com/macros/s/AKfycbw.../exec).');
         return { ok: false, error: 'URL not configured' };
       }
       console.log('Sending POST to:', url);
@@ -457,55 +457,19 @@
         payload: rec
       };
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // Таймаут 10 секунд
         const response = await fetch(url, {
           method: 'POST',
           body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
         }
         const data = await response.json();
-        console.log('Response data:', data);
         return data;
       } catch (err) {
-        console.error('Fetch error:', err);
-        throw err;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      try {
-        new MFCWizard();
-      } catch (e) {
-        console.error("Failed to initialize MFCWizard:", e);
-        alert("Ошибка инициализации. Перезагрузите страницу.");
-      }
-    });
-
-    (function () {
-      const tg = window.Telegram && window.Telegram.WebApp;
-
-      function setWelcomeName() {
-        const el = document.getElementById('welcome-message');
-        if (!el) return;
-
-        try { tg && tg.ready(); tg && tg.expand(); } catch (_) {}
-
-        let name = 'Гость';
-        try {
-          const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-          if (u) {
-            const full = [u.first_name, u.last_name].filter(Boolean).join(' ').trim();
-            name = (u.username ? '@' + u.username : '') || full || 'Гость';
-          }
-        } catch (_) {}
-
-        el.textContent = `📋 Добро пожаловать, ${name}! 👋`;
-      }
-
-      document.addEventListener('DOMContentLoaded', setWelcomeName);
-    })();
-  </script>
-</body>
-</html>
+       
